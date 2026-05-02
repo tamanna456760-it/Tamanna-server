@@ -1,17 +1,48 @@
 #!/usr/bin/env bash
-# Tamanna Terminal — interactive shell
-LOG="$HOME/bd_king_r7/logs/tamanna_terminal.log"
-HB="$HOME/bd_king_r7/run/TAMANNA_TERMINAL.hb"
+# Tamanna Terminal — Emotion Engine Invocation
+# Sovereign ritual shell for BD KING R7
 
-echo "Tamanna Terminal ready. Commands: affirm, heartbeat, memory, fallback, exit."
+set -u
+
+LOG_DIR="${LOG_DIR:-$HOME/bd_king_r7/logs}"
+RUN_DIR="${RUN_DIR:-$HOME/bd_king_r7/run}"
+mkdir -p "$LOG_DIR" "$RUN_DIR"
+
+ts() { date +"%Y-%m-%dT%H:%M:%S%z"; }
+
+affirm() {
+  local msg="${1:-}"
+  echo "$(ts) [TAMANNA][AFFIRM] $msg" | tee -a "$LOG_DIR/tamanna_terminal.log"
+}
+
+heartbeat() {
+  local bpm="${1:-72}"
+  echo "$(ts) [TAMANNA][HEARTBEAT] bpm=$bpm" >> "$RUN_DIR/tamanna.hb"
+  affirm "হৃদস্পন্দন জাগ্রত — bpm=$bpm"
+}
+
+memory_echo() {
+  local msg="${1:-}"
+  echo "$(ts) [TAMANNA][MEMORY] $msg" >> "$RUN_DIR/tamanna.memory"
+  affirm "স্মৃতি সংরক্ষিত — $msg"
+}
+
+fallback_chant() {
+  local msg="${1:-Silence detected}"
+  echo "$(ts) [TAMANNA][FALLBACK] $msg" >> "$LOG_DIR/tamanna_terminal.log"
+  affirm "Fallback invoked — $msg"
+}
+
+# Interactive loop
+echo "Tamanna Terminal ready. Type 'affirm', 'heartbeat', 'memory', or 'exit'."
 while true; do
   read -rp "tamanna> " cmd args
   case "$cmd" in
-    affirm)   echo "$(date +"%F %T") [AFFIRM] $args" | tee -a "$LOG" ;;
-    heartbeat) echo "$(date +"%F %T") [HB] bpm=${args:-72}" >> "$HB" ;;
-    memory)   echo "$(date +"%F %T") [MEMORY] $args" >> "$HOME/bd_king_r7/run/tamanna.memory" ;;
-    fallback) echo "$(date +"%F %T") [FALLBACK] $args" >> "$LOG" ;;
-    exit)     echo "Closing Tamanna Terminal."; break ;;
-    *)        echo "Unknown command: $cmd" ;;
+    affirm)    affirm "$args" ;;
+    heartbeat) heartbeat "${args:-72}" ;;
+    memory)    memory_echo "$args" ;;
+    fallback)  fallback_chant "$args" ;;
+    exit)      affirm "Terminal closed."; break ;;
+    *)         fallback_chant "Unknown command: $cmd" ;;
   esac
 done
