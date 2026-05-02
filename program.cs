@@ -1,228 +1,88 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 using System;
-using System.IO;
-using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-class BDKingR7
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetValue<string>("Database:ConnectionString") ?? "Data Source=reports.db"));
+builder.Services.AddEndpointsApiExplorer();
+
+var app = builder.Build();
+
+app.MapPost("/api/report", async (HttpRequest request, AppDbContext db, IConfiguration cfg) =>
 {
-    static string StateFile = "state.db";
+    // Simple token auth using header Authorization: Bearer <token>
+    var expected = cfg.GetValue<string>("Orchestrator:Token") ?? "change-me";
+    if (!request.Headers.TryGetValue("Authorization", out var auth) || !auth.ToString().StartsWith("Bearer "))
+        return Results.Unauthorized();
+    var token = auth.ToString().Substring("Bearer ".Length).Trim();
+    if (token != expected) return Results.StatusCode(403);
 
-    static Dictionary<string, string> state = new();
-
-    static void Main()
+    ReportPayload payload;
+    try
     {
-        LoadState();
-
-        IncrementCycle();
-        EmotionEngine();
-        ForceFieldEngine();
-        PowerEngine();
-        DriftEngine();
-        StabilityEngine();
-        VairajEngine();
-        FusionEngine();
-
-        SaveState();
-        PrintProfile();
+        payload = await JsonSerializer.DeserializeAsync<ReportPayload>(request.Body);
     }
-
-    // ---------------------------------------------------------
-    // STATE MANAGEMENT
-    // ---------------------------------------------------------
-    static void LoadState()
+    catch
     {
-        if (!File.Exists(StateFile))
-        {
-            File.WriteAllLines(StateFile, new[]
-            {
-                "emotion=CALM",
-                "emotion_intensity=50",
-                "power_mode=SUPERSONIC",
-                "power_drift=0",
-                "power_stability=100",
-                "force_field=FOUNDATION",
-                "vairaj_directive=PRESERVE",
-                "vairaj_shadow_level=0",
-                "vairaj_hint=HOLD",
-                "vairaj_trust=50",
-                "cycles=0"
-            });
-        }
-
-        foreach (var line in File.ReadAllLines(StateFile))
-        {
-            var parts = line.Split('=');
-            if (parts.Length == 2)
-                state[parts[0]] = parts[1];
-        }
+        return Results.BadRequest(new { error = "invalid json" });
     }
-
-    static void SaveState()
+    var r = new Report
     {
-        List<string> lines = new();
-        foreach (var kv in state)
-            lines.Add($"{kv.Key}={kv.Value}");
-        File.WriteAllLines(StateFile, lines);
-    }
+        AgentId = payload.AgentId,
+        Timestamp = DateTime.UtcNow,
+        Branch = payload.Branch,
+        BuildOk = payload.BuildOk ? "true" : "false",
+        Committed = payload.Committed ? "true" : "false",
+        CommitSha = payload.CommitSha ?? "",
+        PayloadJson = JsonSerializer.Serialize(payload)
+    };
+    db.Reports.Add(r);
+    await db.SaveChangesAsync();
+    return Results.Created($"/api/report/{r.Id}", new { status = "ok" });
+});
 
-    static string Get(string key) => state[key];
-    static int GetInt(string key) => int.Parse(state[key]);
-    static void Set(string key, object value) => state[key] = value.ToString();
-
-    // ---------------------------------------------------------
-    // CYCLE COUNTER
-    // ---------------------------------------------------------
-    static void IncrementCycle()
+app.MapGet("/", async (AppDbContext db) =>
+{
+    var rows = db.Reports.OrderByDescending(r => r.Id).Take(200).ToArray();
+    var html = "<html><head><title>bd-king-r7 Orchestrator</title></head><body>";
+    html += "<h1>bd-king-r7 Orchestrator - Recent Reports</h1>";
+    html += "<table border=1 cellpadding=6><tr><th>ID</th><th>Agent</th><th>Time</th><th>Branch</th><th>Build</th><th>Committed</th><th>Commit</th></tr>";
+    foreach (var r in rows)
     {
-        int c = GetInt("cycles");
-        Set("cycles", c + 1);
+        html += $"<tr><td>{r.Id}</td><td>{r.AgentId}</td><td>{r.Timestamp:O}</td><td>{r.Branch}</td><td>{r.BuildOk}</td><td>{r.Committed}</td><td>{r.CommitSha}</td></tr>";
     }
+    html += "</table></body></html>";
+    return Results.Content(html, "text/html");
+});
 
-    // ---------------------------------------------------------
-    // EMOTION ENGINE
-    // ---------------------------------------------------------
-    static void EmotionEngine()
-    {
-        int intensity = GetInt("emotion_intensity");
-        intensity += new Random().Next(-7, 8);
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
-        intensity = Math.Clamp(intensity, 10, 100);
+app.Run();
 
-        string emo =
-            intensity > 80 ? "ASCENDING" :
-            intensity > 60 ? "FOCUSED" :
-            intensity > 40 ? "CALM" :
-            "BURNING";
 
-        Set("emotion", emo);
-        Set("emotion_intensity", intensity);
-    }
-
-    // ---------------------------------------------------------
-    // FORCE FIELD ENGINE
-    // ---------------------------------------------------------
-    static void ForceFieldEngine()
-    {
-        string emo = Get("emotion");
-        string ff =
-            emo == "ASCENDING" ? "DOMINION" :
-            emo == "BURNING" ? "IGNITION" :
-            emo == "FOCUSED" || emo == "CALM" ? "FOUNDATION" :
-            "RESONANCE";
-
-        Set("force_field", ff);
-    }
-
-    // ---------------------------------------------------------
-    // POWER ENGINE
-    // ---------------------------------------------------------
-    static void PowerEngine()
-    {
-        string emo = Get("emotion");
-        string mode =
-            emo == "CALM" ? "SUPERSONIC" :
-            emo == "FOCUSED" ? "HYPERSONIC" :
-            emo == "ASCENDING" ? "ULTRA" :
-            "ASCEND";
-
-        Set("power_mode", mode);
-    }
-
-    // ---------------------------------------------------------
-    // DRIFT ENGINE
-    // ---------------------------------------------------------
-    static void DriftEngine()
-    {
-        int drift = GetInt("power_drift");
-        drift += new Random().Next(0, 5);
-        drift = Math.Clamp(drift, 0, 50);
-        Set("power_drift", drift);
-    }
-
-    // ---------------------------------------------------------
-    // STABILITY ENGINE
-    // ---------------------------------------------------------
-    static void StabilityEngine()
-    {
-        int drift = GetInt("power_drift");
-        int stab = GetInt("power_stability");
-
-        stab -= drift / 5;
-        stab = Math.Clamp(stab, 0, 100);
-
-        Set("power_stability", stab);
-    }
-
-    // ---------------------------------------------------------
-    // VAIRAJ ENGINE
-    // ---------------------------------------------------------
-    static void VairajEngine()
-    {
-        int drift = GetInt("power_drift");
-        int stab = GetInt("power_stability");
-        int trust = GetInt("vairaj_trust");
-
-        string directive =
-            stab < 30 ? "STABILIZE" :
-            drift > 30 ? "CONTAIN" :
-            "ASCEND";
-
-        Set("vairaj_directive", directive);
-
-        int shadow = drift + (100 - stab) / 2;
-        shadow = Math.Clamp(shadow, 0, 100);
-        Set("vairaj_shadow_level", shadow);
-
-        string hint =
-            shadow > 70 ? "GROUND" :
-            shadow > 40 ? "LIMIT" :
-            "ALLOW";
-
-        Set("vairaj_hint", hint);
-
-        trust += stab / 20 - shadow / 20;
-        trust = Math.Clamp(trust, 0, 100);
-        Set("vairaj_trust", trust);
-    }
-
-    // ---------------------------------------------------------
-    // FUSION ENGINE
-    // ---------------------------------------------------------
-    static void FusionEngine()
-    {
-        string mode = Get("power_mode");
-        int basePower =
-            mode == "SUPERSONIC" ? 1500 :
-            mode == "HYPERSONIC" ? 3000 :
-            mode == "ULTRA" ? 6000 :
-            12000;
-
-        int drift = GetInt("power_drift");
-        int stab = GetInt("power_stability");
-
-        int fusion = 100 + drift - (100 - stab) / 2;
-        fusion = Math.Clamp(fusion, 50, 200);
-
-        int output = basePower * fusion / 100;
-        Set("power_output", output);
-    }
-
-    // ---------------------------------------------------------
-    // PROFILE OUTPUT
-    // ---------------------------------------------------------
-    static void PrintProfile()
-    {
-        Console.WriteLine("============== BD-KING-R7 (.NET VERSION) ==============");
-        Console.WriteLine($" Emotion      : {Get("emotion")} ({Get("emotion_intensity")})");
-        Console.WriteLine($" Power Mode   : {Get("power_mode")}");
-        Console.WriteLine($" Drift        : {Get("power_drift")}");
-        Console.WriteLine($" Stability    : {Get("power_stability")}%");
-        Console.WriteLine($" Force Field  : {Get("force_field")}");
-        Console.WriteLine($" Vairaj Dir   : {Get("vairaj_directive")}");
-        Console.WriteLine($" Vairaj Hint  : {Get("vairaj_hint")}");
-        Console.WriteLine($" Vairaj Shadow: {Get("vairaj_shadow_level")}");
-        Console.WriteLine($" Vairaj Trust : {Get("vairaj_trust")}");
-        Console.WriteLine($" Power Output : {Get("power_output")} W");
-        Console.WriteLine($" Cycles       : {Get("cycles")}");
-        Console.WriteLine("========================================================");
-    }
+// Small DTO for incoming payload
+public class ReportPayload
+{
+    public string AgentId { get; set; }
+    public string Branch { get; set; }
+    public bool BuildOk { get; set; }
+    public bool Committed { get; set; }
+    public string CommitSha { get; set; }
+    public object FixerOut { get; set; }
+    public object BuildOut { get; set; }
+    public bool HasChanges { get; set; }
+    public string RepoPath { get; set; }
 }
