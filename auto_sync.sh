@@ -1,15 +1,14 @@
 #!/bin/bash
 
-echo "🔄 Pulling latest code..."
-git pull origin main
+REPO_DIR="$HOME/tamanna-system"
+LOG_FILE="$REPO_DIR/powerhub_sync.log"
 
-echo "📦 Adding changes..."
-git add .
+cd "$REPO_DIR" || exit 1
 
-echo "📝 Committing..."
-git commit -m "Auto sync $(date)"
+echo "===== PowerHub Auto Sync =====" >> "$LOG_FILE"
+date >> "$LOG_FILE"
 
-echo "🚀 Pushing to Git..."
-git push origin main
+git reset --hard HEAD >> "$LOG_FILE" 2>&1
+git pull origin main >> "$LOG_FILE" 2>&1
 
-echo "✅ ALL SYSTEMS SYNCED"
+echo "✔ Sync completed" >> "$LOG_FILE"
