@@ -1,10 +1,38 @@
-; ===== tamanna.io DNS Zone =====
+; =====================================================
+; Tamanna AI - Production DNS Zone
+; Domain: tamanna.com
+; Website: https://www.tamanna.com
+; Owner: HM INSAN ALI
+; =====================================================
 
-A     @       185.123.45.67
-A     www     185.123.45.67
+$ORIGIN tamanna.com.
+$TTL 3600
 
-; Optional (Email – safe to keep)
-MX    @       10 mail.tamanna.io.
+; Main domain
+@       IN  A       YOUR_REAL_SERVER_IPV4
 
-; Optional TXT (security / verification)
-TXT   @       "v=spf1 a mx ~all"
+; WWW subdomain
+www     IN  CNAME   tamanna.com.
+
+; Optional IPv6 - add only if configured
+; @       IN  AAAA    YOUR_REAL_SERVER_IPV6
+
+; Optional email - configure only if mail server exists
+; @       IN  MX  10  mail.tamanna.com.
+; mail    IN  A       YOUR_REAL_MAIL_SERVER_IPV4
+
+; SPF - replace with your email provider’s authorized senders
+; @       IN  TXT     “v=spf1 include:YOUR_MAIL_PROVIDER ~all”
+
+; DMARC monitoring policy
+_dmarc  IN  TXT     “v=DMARC1; p=none; adkim=r; aspf=r”
+
+; DKIM - publish the actual public key from your email provider
+; default._domainkey IN TXT “v=DKIM1; k=rsa; p=YOUR_REAL_PUBLIC_KEY”
+
+; Enable DNSSEC through the domain/DNS provider
+; Obtain DS records from the provider; do not invent them.
+
+; =====================================================
+; End of Tamanna AI DNS Zone
+; =====================================================
