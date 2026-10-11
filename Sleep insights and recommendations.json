@@ -1,39 +1,154 @@
 {
-  "application": "Auto Run Configuration",
-  "version": "1.0",
-  "settings": {
-    "autoStart": true,
-    "delay": 5000,
-    "retryAttempts": 3
-  },
-  "tasks": [
-    {
-      "id": 1,
-      "name": "System Check",
-      "enabled": true,
-      "command": "system-check.exe"
-    },
-    {
-      "id": 2,
-      "name": "Backup Data",
-      "enabled": false,
-      "command": "backup-tool.exe"
-    }
-  ],
-  "dependencies": [
-    "node_modules",
-    "config_files",
-    "log_directory"
-  ]
-}
+“$schema”: “https://json-schema.org/draft/2020-12/schema”,
+“application”: “Tamanna AI Auto Run System”,
+“version”: “3.0.0”,
+“metadata”: {
+“owner”: “HM INSAN ALI”,
+“system”: “Tamanna AI”,
+“codename”: “BD-KING-R7”,
+“environment”: “production”
+},
+“startup”: {
+“autoStart”: true,
+“delayMs”: 5000,
+“waitForDependencies”: true,
+“validateConfiguration”: true,
+“singleInstance”: true,
+“stopOnCriticalFailure”: true
+},
+“execution”: {
+“workingDirectory”: “.”,
+“maxConcurrentTasks”: 2,
+“defaultTimeoutSeconds”: 60,
+“retryAttempts”: 3,
+“retryDelayMs”: 5000,
+“exponentialBackoff”: true,
+“continueOnNonCriticalFailure”: true
+},
+“autorun”: {
+“scripts”: [
 {
-  "autorun": {
-    "scripts": [
-      "initialize.js",
-      "main.js",
-      "cleanup.js"
-    ],
-    "environment": "production",
-    "permissions": "full"
-  }
+“name”: “initialize”,
+“path”: “initialize.js”,
+“enabled”: true,
+“order”: 1,
+“timeoutSeconds”: 30
+},
+{
+“name”: “main”,
+“path”: “main.js”,
+“enabled”: true,
+“order”: 2,
+“timeoutSeconds”: 300
+},
+{
+“name”: “cleanup”,
+“path”: “cleanup.js”,
+“enabled”: true,
+“order”: 3,
+“runOnGracefulShutdown”: true,
+“timeoutSeconds”: 30
+}
+]
+},
+“tasks”: [
+{
+“id”: “system-check”,
+“name”: “System Check”,
+“enabled”: true,
+“command”: “system-check.exe”,
+“arguments”: [],
+“timeoutSeconds”: 60,
+“retryAttempts”: 3,
+“critical”: true,
+“requiresApproval”: false
+},
+{
+“id”: “backup-data”,
+“name”: “Backup Data”,
+“enabled”: false,
+“command”: “backup-tool.exe”,
+“arguments”: [],
+“timeoutSeconds”: 300,
+“retryAttempts”: 3,
+“critical”: false,
+“requiresApproval”: true
+}
+],
+“dependencies”: {
+“directories”: [
+“node_modules”,
+“config_files”,
+“logs”,
+“data”
+],
+“requiredFiles”: [
+“initialize.js”,
+“main.js”,
+“cleanup.js”
+],
+“checkBeforeStartup”: true,
+“createMissingLogDirectory”: true,
+“installMissingDependenciesAutomatically”: false
+},
+“healthMonitoring”: {
+“enabled”: true,
+“checkIntervalSeconds”: 60,
+“restartOnFailure”: false,
+“failureThreshold”: 3,
+“healthEndpoint”: “http://127.0.0.1:8080/health”
+},
+“backup”: {
+“enabled”: true,
+“beforeUpgrade”: true,
+“automaticSchedule”: false,
+“retentionCopies”: 7,
+“includeConfiguration”: true,
+“includeLogs”: false,
+“verifyBackup”: true,
+“requireApprovalForRestore”: true
+},
+“security”: {
+“permissions”: “least-privilege”,
+“validateCommandsAgainstAllowlist”: true,
+“allowShellOperators”: false,
+“allowUnlistedCommands”: false,
+“requireApprovalForDestructiveTasks”: true,
+“storeSecretsInEnvironment”: true,
+“redactSecretsFromLogs”: true,
+“restrictWorkingDirectory”: true
+},
+“logging”: {
+“enabled”: true,
+“level”: “info”,
+“directory”: “logs/”,
+“timestamp”: true,
+“format”: “jsonl”,
+“rotateLogs”: true,
+“maxFileSizeMB”: 10,
+“retentionDays”: 30,
+“logTaskStart”: true,
+“logTaskCompletion”: true,
+“logFailures”: true
+},
+“shutdown”: {
+“graceful”: true,
+“timeoutSeconds”: 30,
+“runCleanupScripts”: true,
+“terminateChildProcesses”: true,
+“preserveData”: true
+},
+“deployment”: {
+“domain”: “https://www.tamanna.com”,
+“automaticDeployment”: false,
+“requireSuccessfulTests”: true,
+“requireBackupBeforeDeployment”: true,
+“requireApprovalForProduction”: true
+},
+“recovery”: {
+“enabled”: true,
+“automaticRollback”: false,
+“preserveOriginalFiles”: true,
+“requireApprovalForDestructiveRecovery”: true
+}
 }
