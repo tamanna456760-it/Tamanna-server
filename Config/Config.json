@@ -1,36 +1,63 @@
 {
-  "server": {
-    "name": "tamanna.io",
-    "host": "0.0.0.0",
-    "port": 8080,
-    "protocol": "https"
-  },
-
-  "security": {
-    "rateLimit": true,
-    "maxRequestsPerMinute": 1200,
-    "enableCORS": true,
-    "allowedOrigins": ["https://tamanna.io"],
-    "helmet": true
-  },
-
-  "database": {
-    "enabled": false,
-    "type": "none",
-    "connection": ""
-  },
-
-  "logging": {
-    "level": "info",
-    "saveLogs": true,
-    "logDirectory": "logs/",
-    "timestamp": true
-  },
-
-  "meta": {
-    "version": "1.0.0",
-    "author": "HM INSAN ALI",
-    "system": "BD KING R7",
-    "description": "Sovereign server configuration for Tamanna Engine"
-  }
+“server”: {
+“name”: “Tamanna AI”,
+“host”: “0.0.0.0”,
+“port”: 8080,
+“publicUrl”: “https://www.tamanna.com”,
+“protocol”: “https”,
+“environment”: “production”,
+“trustProxy”: 1
+},
+“security”: {
+“rateLimit”: true,
+“maxRequestsPerMinute”: 120,
+“enableCORS”: true,
+“allowedOrigins”: [
+“https://www.tamanna.com”,
+“https://tamanna.com”
+],
+“helmet”: true,
+“requireHttps”: true,
+“hideServerDetails”: true,
+“maxRequestBodyMB”: 2
+},
+“database”: {
+“enabled”: false,
+“type”: “none”,
+“connection”: “”
+},
+“logging”: {
+“level”: “info”,
+“saveLogs”: true,
+“logDirectory”: “logs/”,
+“timestamp”: true,
+“rotateLogs”: true,
+“redactSecrets”: true
+},
+“health”: {
+“enabled”: true,
+“endpoint”: “/health”
+},
+“api”: {
+“enabled”: true,
+“basePath”: “/api”,
+“requestTimeoutSeconds”: 30
+},
+“backup”: {
+“enabled”: true,
+“beforeUpgrade”: true,
+“retainCopies”: 7
+},
+“updates”: {
+“automaticDeployment”: false,
+“requireTests”: true,
+“requireBackup”: true,
+“requireApprovalForDestructiveChanges”: true
+},
+“meta”: {
+“version”: “2.0.0”,
+“author”: “HM INSAN ALI”,
+“system”: “Tamanna AI”,
+“description”: “Secure, modular Tamanna AI server configuration”
+}
 }
