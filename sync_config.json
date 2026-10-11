@@ -1,5 +1,123 @@
 {
-  "auto_pull": true,
-  "auto_commit": true,
-  "auto_push": true
+“$schema”: “https://json-schema.org/draft/2020-12/schema”,
+“application”: “Tamanna AI”,
+“module”: “Git Synchronization Engine”,
+“version”: “3.0.0”,
+“owner”: “HM INSAN ALI”,
+“repository”: “tamanna456760-it/Tamanna-”,
+“sync”: {
+“enabled”: true,
+“auto_pull”: true,
+“auto_commit”: true,
+“auto_push”: true,
+“remote”: “origin”,
+“branch”: “main”,
+“fetch_before_pull”: true,
+“pull_strategy”: “ff-only”,
+“push_only_after_successful_tests”: true,
+“verify_remote_branch”: true,
+“skip_if_no_changes”: true,
+“force_push”: false
+},
+“schedule”: {
+“enabled”: false,
+“interval_minutes”: 15,
+“run_on_startup”: false,
+“run_on_repository_change”: false
+},
+“commit”: {
+“message_template”: “🤖 Tamanna AI Sync: {timestamp}”,
+“include_untracked”: true,
+“require_changes”: true,
+“run_tests_before_commit”: true,
+“verify_identity”: true,
+“sign_commits”: false
+},
+“backup”: {
+“enabled”: true,
+“before_pull”: true,
+“before_push”: true,
+“directory”: “backups/”,
+“retention_copies”: 7,
+“verify_backup”: true,
+“exclude”: [
+“.git”,
+“node_modules”,
+“.venv”,
+“pycache”,
+“.env”,
+“.token”,
+“.pem”,
+“*.key”
+]
+},
+“conflicts”: {
+“strategy”: “stop-and-report”,
+“automatic_resolution”: false,
+“automatic_overwrite”: false,
+“require_manual_resolution”: true,
+“preserve_local_changes”: true
+},
+“retry”: {
+“enabled”: true,
+“max_attempts”: 3,
+“initial_delay_ms”: 2000,
+“max_delay_ms”: 15000,
+“exponential_backoff”: true,
+“retry_network_errors_only”: true
+},
+“validation”: {
+“enabled”: true,
+“check_git_status”: true,
+“check_current_branch”: true,
+“check_remote_connectivity”: true,
+“check_sensitive_files”: true,
+“check_merge_conflicts”: true,
+“abort_on_failure”: true
+},
+“security”: {
+“credential_source”: “ssh_or_credential_manager”,
+“never_store_tokens_in_config”: true,
+“never_commit_secrets”: true,
+“redact_secrets_in_logs”: true,
+“allow_force_push”: false,
+“allow_destructive_reset”: false,
+“respect_branch_protection”: true,
+“require_approval_for_destructive_changes”: true
+},
+“testing”: {
+“enabled”: true,
+“commands”: [
+“npm test”
+],
+“skip_if_command_unavailable”: false,
+“push_on_failure”: false
+},
+“logging”: {
+“enabled”: true,
+“directory”: “logs/”,
+“level”: “info”,
+“format”: “jsonl”,
+“timestamp”: true,
+“record_fetch”: true,
+“record_pull”: true,
+“record_commit”: true,
+“record_push”: true,
+“record_failures”: true,
+“rotate_logs”: true,
+“retention_days”: 30
+},
+“recovery”: {
+“enabled”: true,
+“automatic_rollback”: false,
+“preserve_original_files”: true,
+“require_approval_for_restore”: true
+},
+“deployment”: {
+“automatic_deployment”: false,
+“production_domain”: “https://www.tamanna.com”,
+“require_successful_sync”: true,
+“require_successful_tests”: true,
+“require_approval”: true
+}
 }
