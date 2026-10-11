@@ -1,1 +1,147 @@
-{}
+{
+“application”: {
+“name”: “Tamanna AI”,
+“id”: “tamanna-ai”,
+“version”: “2.0.0”,
+“description”: “Tamanna AI Modular Intelligence and Automation Platform”,
+“author”: “HM INSAN ALI”,
+“system”: “BD KING R7”,
+“environment”: “production”
+},
+“framework”: {
+“name”: “.NET”,
+“targetFramework”: “net8.0”,
+“runtime”: “Microsoft.NETCore.App”,
+“language”: “C#”
+},
+“server”: {
+“host”: “0.0.0.0”,
+“port”: 8080,
+“protocol”: “https”,
+“publicUrl”: “https://www.tamanna.com”,
+“redirectHttpToHttps”: true,
+“trustProxy”: false
+},
+“domains”: {
+“primary”: “tamanna.com”,
+“www”: “www.tamanna.com”,
+“allowedHosts”: [
+“tamanna.com”,
+“www.tamanna.com”
+],
+“forceCanonicalHost”: “www.tamanna.com”
+},
+“security”: {
+“enabled”: true,
+“rateLimit”: {
+“enabled”: true,
+“requestsPerMinute”: 120
+},
+“cors”: {
+“enabled”: true,
+“allowedOrigins”: [
+“https://tamanna.com”,
+“https://www.tamanna.com”
+],
+“allowCredentials”: false
+},
+“https”: {
+“requiredInProduction”: true,
+“hsts”: true,
+“certificateManagedExternally”: true
+},
+“headers”: {
+“hideServerDetails”: true,
+“contentTypeOptions”: true,
+“frameProtection”: true
+},
+“authentication”: {
+“requiredForAdmin”: true,
+“provider”: “configure-separately”
+},
+“secrets”: {
+“storeInEnvironmentVariables”: true,
+“commitSecretsToGit”: false
+}
+},
+“api”: {
+“enabled”: true,
+“basePath”: “/api”,
+“healthEndpoint”: “/health”,
+“statusEndpoint”: “/api/status”,
+“requestTimeoutSeconds”: 30,
+“maxRequestBodyBytes”: 2097152
+},
+“features”: {
+“chat”: true,
+“voice”: false,
+“memory”: true,
+“projectContext”: true,
+“moduleRouter”: true,
+“webResearch”: true,
+“fileOperations”: true,
+“githubIntegration”: true,
+“automaticCodeChanges”: false,
+“approvalBeforeDestructiveChanges”: true
+},
+“database”: {
+“enabled”: false,
+“provider”: “none”,
+“connectionStringEnvironmentVariable”: “TAMANNA_DB_CONNECTION”
+},
+“storage”: {
+“dataDirectory”: “data/”,
+“uploadsDirectory”: “uploads/”,
+“maxUploadSizeMB”: 10,
+“validateUploads”: true
+},
+“logging”: {
+“enabled”: true,
+“level”: “Information”,
+“directory”: “logs/”,
+“timestamp”: true,
+“structuredLogging”: true,
+“redactSecrets”: true,
+“rotateLogs”: true
+},
+“backup”: {
+“enabled”: true,
+“beforeUpgrade”: true,
+“retainedCopies”: 7,
+“includeConfiguration”: true,
+“includeLogs”: false,
+“restoreRequiresApproval”: true
+},
+“github”: {
+“enabled”: true,
+“repository”: “tamanna456760-it/Tamanna-”,
+“branch”: “main”,
+“automaticDeployment”: false,
+“requireTestsBeforeDeployment”: true,
+“requireApprovalForProduction”: true,
+“tokenEnvironmentVariable”: “TAMANNA_GITHUB_TOKEN”
+},
+“deployment”: {
+“mode”: “production”,
+“healthCheckRequired”: true,
+“automaticRollback”: false,
+“requireBackup”: true,
+“requireSuccessfulBuild”: true
+},
+“monitoring”: {
+“healthChecks”: true,
+“reportRuntimeVersion”: true,
+“exposeSensitiveDiagnostics”: false
+},
+“compatibility”: {
+“backwardCompatible”: true,
+“preserveExistingFiles”: true,
+“preserveExistingApiRoutes”: true
+},
+“metadata”: {
+“schemaVersion”: “1.0”,
+“owner”: “HM INSAN ALI”,
+“product”: “Tamanna AI”,
+“updatedAt”: “2026-10-11”
+}
+}
