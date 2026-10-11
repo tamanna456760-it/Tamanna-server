@@ -1,8 +1,64 @@
 {
-  "system_name": "TAMANN A SYSTEM",
-  "version": "v1.0.0-MASTER",
-  "developer_id": "tamanna456760-it",
-  "identity_provider": "Google",
-  "trust_level": "high",
-  "verification": "mandatory"
+“$schema”: “https://json-schema.org/draft/2020-12/schema”,
+“identity_format”: “1.0.0”,
+“system_identity”: {
+“id”: “tamanna-ai”,
+“name”: “Tamanna AI”,
+“codename”: “BD-KING-R7”,
+“owner”: “HM INSAN ALI”,
+“publisher”: “tamanna456760-it”,
+“version”: “v1.0.0-MASTER”,
+“release_channel”: “stable”,
+“description”: “Modular AI assistant and automation platform”
+},
+“platform”: {
+“framework”: “.NET”,
+“target_framework”: “net8.0”,
+“architecture”: “modular”,
+“repository”: “https://github.com/tamanna456760-it/Tamanna-”,
+“production_url”: “https://www.tamanna.com”
+},
+“attestation”: {
+“declared”: true,
+“verified”: false,
+“issuer”: null,
+“issued_at”: “2026-01-03T18:00:00Z”,
+“verification_method”: “digital_signature”,
+“signature_algorithm”: “Ed25519”,
+“signature”: null,
+“public_key_id”: null
+},
+“integrity”: {
+“algorithm”: “SHA-256”,
+“artifact_hash”: null,
+“manifest_hash”: null,
+“verification_required”: true
+},
+“security”: {
+“https_required”: true,
+“secrets_in_source_control”: false,
+“signed_release_required”: true,
+“audit_logging”: true,
+“destructive_changes_require_approval”: true,
+“automatic_deployment”: false
+},
+“capabilities”: {
+“chat”: true,
+“memory”: true,
+“module_routing”: true,
+“project_context”: true,
+“github_integration”: true,
+“automated_testing”: true,
+“automatic_code_modification”: false
+},
+“compatibility”: {
+“preserve_existing_files”: true,
+“preserve_existing_api_routes”: true,
+“backward_compatible”: true
+},
+“status”: {
+“identity_file”: “configured”,
+“cryptographic_verification”: “not_verified”,
+“domain_deployment”: “not_verified”
+}
 }
