@@ -1,6 +1,31 @@
 {
-  "attested": true,
-  "tamanna": "tamanna456760-it:abcd...",
-  "version": "v1.0.0-MASTER",
-  "timestamp": "2026-01-03T18:00Z"
+“$schema”: “https://json-schema.org/draft/2020-12/schema”,
+“formatVersion”: “1.0.0”,
+“attested”: true,
+“tamanna”: “tamanna456760-it”,
+“version”: “v1.0.0-MASTER”,
+“timestamp”: “2026-01-03T18:00:00Z”,
+“system”: {
+“name”: “Tamanna AI”,
+“owner”: “HM INSAN ALI”,
+“framework”: “.NET 8.0”,
+“releaseChannel”: “stable”
+},
+“integrity”: {
+“algorithm”: “SHA-256”,
+“hash”: null,
+“signature”: null,
+“verified”: false
+},
+“security”: {
+“requireHttps”: true,
+“requireSignedRelease”: true,
+“protectSecrets”: true
+},
+“deployment”: {
+“domain”: “https://www.tamanna.com”,
+“automaticDeployment”: false,
+“requireBackup”: true,
+“requireTests”: true
+}
 }
