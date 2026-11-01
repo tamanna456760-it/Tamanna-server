@@ -1,68 +1,417 @@
-```markdown
-# bd-king-r7 powerhub — Scalable Auto-Sync System
+TAMANNA CENTRAL SERVER
 
-What this package provides
+The Core Infrastructure of Tamanna AI
 
-- Agent (Python) to run on each server that hosts bd-king-r7 code:
-  - Safe automated sync, auto-fix, build/test, update marker files, commit & optional push.
-  - Posts JSON reports to a central orchestrator.
-  - Locking to avoid overlapping runs and logs to /var/log.
-- Orchestrator (Flask) to receive reports and provide a small dashboard.
-- Docker Compose for running the orchestrator centrally.
-- systemd unit for the agent.
+Project: Tamanna Central Server
+Owner: HM INSAN ALI
+Repository: tamanna456760-it/Tamanna-server
+Branch: main
+Status: Under Development & Security Audit
 
-Why this is more powerful
+⸻
 
-- Central reporting and history of automated runs for many servers.
-- Token-based authentication for agents.
-- Per-server configuration allows different fix/build hooks.
-- Better safety defaults: dedicated automation branch, push disabled by default.
-- Can be extended: add alerts (Slack/email), advanced dashboards, role-based access, certificate-based mTLS, or GitOps triggers.
+1. Project Overview
 
-Quick install (orchestrator)
+Tamanna Central Server is designed to be the central backend infrastructure of the Tamanna AI ecosystem.
 
-1. On the central server:
-   - Copy the orchestrator folder to /opt/bd-king-r7-orchestrator
-   - Set a strong ORCHESTRATOR_TOKEN in an env file or export it
-   - Run: docker-compose up -d --build
-   - Visit http://<server-ip>:8000 to view recent reports.
+Its purpose is to provide a unified, secure, scalable and self-managed platform for managing AI services, APIs, users, devices, databases, automation, networking, monitoring and connected systems.
 
-Agent install (per server)
+The central server will act as the primary control point for authorized Tamanna services.
 
-1. Copy agent.py to /opt/bd-king-r7-powerhub/agent.py
-2. Create /etc/bdking/agent.yml (see agent.example.yml) and edit values:
-   - repo_path, branch, fix_cmds, build_cmds, server_url, auth_token
-3. Ensure Python3 and 'requests' and 'pyyaml' are installed:
-   pip3 install requests pyyaml
-4. Create systemd unit /etc/systemd/system/bd-king-agent.service (edit User)
-5. Enable and start:
-   sudo systemctl daemon-reload
-   sudo systemctl enable --now bd-king-agent.service
-6. Check logs:
-   tail -f /var/log/bd-king-r7-powerhub.log
-7. Test run:
-   sudo -u youruser /usr/bin/env python3 /opt/bd-king-r7-powerhub/agent.py
-   (or stop service then run manually for one loop)
+2. Core Mission
 
-Security notes
+* Build an independent, self-hosted server infrastructure.
+* Manage all authorized Tamanna services from one central system.
+* Provide secure communication between applications and services.
+* Manage users, devices, permissions and identities.
+* Support AI models and intelligent agents.
+* Maintain centralized data and storage.
+* Provide monitoring, logging, auditing and recovery.
+* Support future multi-server deployment and high availability.
 
-- Use a unique ORCHESTRATOR_TOKEN and keep it secret.
-- Use HTTPS for orchestrator (put a reverse proxy like nginx/Caddy/Traefik in front).
-- Consider mTLS or per-agent tokens for better security in production.
-- Make sure the user running agent has only necessary permissions.
+3. System Architecture
 
-Operational notes
+              TAMANNA ECOSYSTEM
+                      |
+          Web / Mobile / Admin Panel
+                      |
+                 HTTPS / TLS
+                      |
+             Reverse Proxy / WAF
+                      |
+             CENTRAL API SERVER
+                      |
+       +--------------+--------------+
+       |              |              |
+     CORE          SECURITY        IDENTITY
+       |              |              |
+       +--------------+--------------+
+                      |
+             SERVICE ORCHESTRATOR
+                      |
+       +--------------+--------------+
+       |              |              |
+      AI           DATABASE        STORAGE
+    SERVICES       SERVICES        SERVICES
+       |              |              |
+       +--------------+--------------+
+                      |
+              MONITORING & AUDIT
+                      |
+              BACKUP & RECOVERY
 
-- Default interval: 60 seconds. Increase to 5m/15m for production to reduce churn.
-- Keep PUSH_CHANGES=false until you validate behavior.
-- To avoid commit history growth, consider using "git commit --amend --no-edit" and force-push on a dedicated branch (ask if you want this variant).
-- Add alerts if build_ok=false for timely human intervention.
+4. Main Server Modules
 
-Next steps I can do for you (choose any)
+Module	Responsibility
+Core	Main server engine
+API	API endpoints and request handling
+Security	Authentication and authorization
+Identity	Users, devices and service identities
+Database	Central data management
+AI Engine	AI provider integration
+Agents	Authorized AI agents
+Orchestration	Service coordination
+Network	Trusted network integrations
+Storage	File and data storage
+Monitoring	Health and performance
+Logging	System and audit logs
+Backup	Backup and recovery
+Cluster	Future multi-server coordination
+Deployment	Server deployment management
 
-- Pre-fill FIX_CMDS and BUILD_CMDS for bd-king-r7 if you give me the repo URL and build commands.
-- Provide an amended-commit variant to limit commit history.
-- Add email/Slack webhook alerts for failed builds.
-- Add TLS & reverse-proxy configuration (nginx/Caddy).
-- Create GitHub Actions workflow alternative (serverless) if you prefer using GitHub instead of self-hosted orchestrator.
-```
+These are target architectural modules. Their presence and implementation must be verified against the actual repository.
+
+5. Technology Stack
+
+Technology	Purpose
+Python	Main backend language
+Flask	Existing HTTP application framework
+SQLAlchemy	Database integration
+SQLite	Development database option
+Docker	Containerization
+Docker Compose	Service orchestration
+Nginx	Reverse proxy
+HTTPS / TLS	Secure communication
+GitHub	Source code management
+AI APIs	Optional AI provider integration
+
+The final production stack must be confirmed against the actual source code and deployment configuration.
+
+6. Repository Structure
+
+Tamanna-server/
+│
+├── README.md
+├── LICENSE
+├── requirements.txt
+├── app.py
+├── server.py
+├── main.py
+│
+├── api/
+├── core/
+├── security/
+├── identity/
+├── database/
+├── agents/
+├── orchestration/
+├── network/
+├── storage/
+├── monitoring/
+├── backup/
+├── cluster/
+│
+├── tests/
+├── scripts/
+├── deploy/
+│   ├── nginx/
+│   └── tor/
+│
+├── data/
+├── logs/
+│
+├── Dockerfile
+├── docker-compose.yml
+├── .dockerignore
+├── .gitignore
+├── .env.example
+│
+└── .github/
+    └── workflows/
+
+This is the target structure, not a claim that every directory currently exists. Preserve existing files and inspect before adding or renaming anything.
+
+7. Domain & Service Configuration
+
+Planned domain endpoints:
+
+Domain	Intended Purpose
+www.tamanna.com	Main web access
+tamanna.com	Main domain
+tamanna.io	Additional domain
+Tamanna.onion	Planned Tor hidden service
+
+Domain ownership, DNS records, TLS certificates and actual deployment must be configured and verified separately.
+
+8. Installation
+
+Clone the repository:
+
+git clone https://github.com/tamanna456760-it/Tamanna-server.git
+cd Tamanna-server
+
+Create a virtual environment:
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+Install dependencies:
+
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+
+Create the local environment file:
+
+cp .env.example .env
+
+Configure the required variables in .env.
+
+Never commit .env to GitHub.
+
+9. Environment Configuration
+
+Example configuration:
+
+APP_NAME=Tamanna Central Server
+APP_ENV=development
+APP_DEBUG=false
+HOST=127.0.0.1
+PORT=8000
+ORCHESTRATOR_TOKEN=
+AI_MODE=local
+GEMINI_API_KEY=
+OPENAI_API_KEY=
+DEEP_API_KEY=
+DATABASE_URL=sqlite:///./data/tamanna.db
+CORS_ORIGINS=http://localhost:3000
+RATE_LIMIT_PER_MINUTE=60
+LOG_LEVEL=INFO
+LOG_DIRECTORY=logs
+BACKUP_ENABLED=true
+BACKUP_DIRECTORY=backups
+
+Only use environment variables that are supported by the application. Production secrets must be strong, unique and stored securely.
+
+10. API Design
+
+Planned API groups:
+
+API	Purpose
+/health	Health status
+/api/auth	Authentication
+/api/users	User management
+/api/agents	Agent management
+/api/ai	AI services
+/api/storage	Storage operations
+/api/monitoring	Monitoring
+/api/backup	Backup management
+/api/admin	Authorized administration
+
+These are proposed endpoints. Implement and document each route before treating it as available.
+
+11. Security Architecture
+
+Security is a fundamental requirement.
+
+* Strong authentication.
+* Role-based access control.
+* Secure session and token management.
+* HTTPS and TLS.
+* Input validation.
+* Request size limits.
+* Rate limiting.
+* CORS restrictions.
+* Security headers.
+* Firewall and network restrictions.
+* Audit logging.
+* Dependency vulnerability checks.
+* Backup encryption.
+* Least-privilege service permissions.
+
+No hardcoded production credentials or insecure fallback tokens are permitted.
+
+12. Database & Storage
+
+The central server should support:
+
+* User records.
+* Service identities.
+* AI configurations.
+* Application settings.
+* System audit records.
+* Authorized automation history.
+* File metadata.
+* Backup metadata.
+
+Production database selection, migrations, retention and access controls must be configured before deployment.
+
+13. AI & Agent Integration
+
+Planned AI capabilities:
+
+* Gemini integration.
+* Other explicitly configured AI providers.
+* AI request routing.
+* Agent orchestration.
+* Knowledge and documentation indexing.
+* Context management.
+* Controlled tool execution.
+* Human approval for sensitive actions.
+
+Agents must operate with limited permissions and must not execute arbitrary commands without authorization.
+
+14. Monitoring & Logging
+
+The monitoring system should track:
+
+* Server availability.
+* CPU and memory usage.
+* Disk capacity.
+* API response status.
+* Application errors.
+* Database availability.
+* Service health.
+* Authentication events.
+* Administrative actions.
+
+Logs must not contain passwords, API keys, access tokens or other secrets.
+
+15. Backup & Disaster Recovery
+
+Required capabilities:
+
+* Scheduled backups.
+* Encrypted backup storage.
+* Database backup.
+* Configuration backup without exposing secrets.
+* Backup integrity verification.
+* Restore procedures.
+* Recovery testing.
+* Retention policies.
+
+A backup is not considered reliable until restoration has been tested.
+
+16. Docker Deployment
+
+Validate the configuration before deployment:
+
+docker compose config
+
+Build the image:
+
+docker compose build
+
+Start services:
+
+docker compose up -d
+
+Inspect service status:
+
+docker compose ps
+
+View logs:
+
+docker compose logs --tail=100
+
+These commands assume the Docker configuration is valid and the required services are defined.
+
+17. Testing & Quality Assurance
+
+Run automated tests:
+
+python -m pytest -q
+
+Before production deployment, verify:
+
+* Application startup.
+* API functionality.
+* Authentication.
+* Authorization.
+* Database connectivity.
+* Input validation.
+* Health checks.
+* Backup restoration.
+* Container security.
+* TLS configuration.
+* Recovery procedures.
+
+18. CI/CD & GitHub Integration
+
+The repository should support:
+
+* Automated tests.
+* Code quality checks.
+* Security scanning.
+* Dependency review.
+* Build validation.
+* Controlled deployment.
+* Deployment logs.
+* Rollback procedures.
+
+GitHub Actions must use least-privilege permissions. Automatic code changes and production deployments require explicit authorization and review.
+
+19. Development Roadmap
+
+Phase	Goal
+Phase 1	Security baseline
+Phase 2	Central API and core engine
+Phase 3	Identity and access management
+Phase 4	Database and storage
+Phase 5	AI and agent integration
+Phase 6	Monitoring and backup
+Phase 7	Docker and production deployment
+Phase 8	Multi-server architecture
+Phase 9	High availability and disaster recovery
+
+20. Contribution Rules
+
+1. Inspect existing code before modifying it.
+2. Never delete working files without approval.
+3. Use separate branches for significant changes.
+4. Keep secrets outside GitHub.
+5. Add tests for new functionality.
+6. Review security implications.
+7. Document configuration changes.
+8. Require approval for production changes.
+
+21. Production Readiness Checklist
+
+* [ ]	Repository structure audited.
+* [ ]	All entry points identified.
+* [ ]	Secrets rotated and protected.
+* [ ]	Authentication verified.
+* [ ]	Authorization verified.
+* [ ]	Database configured.
+* [ ]	API tests passing.
+* [ ]	Health checks working.
+* [ ]	Docker configuration validated.
+* [ ]	Nginx configuration validated.
+* [ ]	HTTPS certificates installed.
+* [ ]	Firewall configured.
+* [ ]	Backup and restore tested.
+* [ ]	Monitoring enabled.
+* [ ]	CI/CD security reviewed.
+* [ ]	Staging deployment verified.
+* [ ]	Production deployment approved.
+
+22. License
+
+See the repository’s LICENSE file for applicable licensing terms. Do not assume a license if no license file is present.
+
+⸻
+
+Tamanna Central Server
+Owner Attribution: HM INSAN ALI
+Repository: https://github.com/tamanna456760-it/Tamanna-server
+
+Building a secure, independent and scalable foundation for the Tamanna AI ecosystem.
