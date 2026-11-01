@@ -1,0 +1,8 @@
+
+# Tamanna AI Tor Hidden Service example
+# Copy settings to the server's Tor configuration only
+# after confirming the local web service port.
+
+HiddenServiceDir /var/lib/tor/tamanna_hidden_service/
+HiddenServiceVersion 3
+HiddenServicePort 80 127.0.0.1:8080
