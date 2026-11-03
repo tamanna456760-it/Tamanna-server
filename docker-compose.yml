@@ -43,9 +43,44 @@ services:
     networks:
       - tamanna-internal
 
+  tor:
+    build:
+      context: .
+      dockerfile: deploy/tor/Dockerfile
+    container_name: tamanna-central-server-tor
+    restart: unless-stopped
+    depends_on:
+      orchestrator:
+        condition: service_healthy
+    volumes:
+      - tamanna-tor-data:/var/lib/tor
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+      - /run:rw,noexec,nosuid,size=4m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD-SHELL", "test -s /var/lib/tor/hidden_service/hostname"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - tamanna-internal
+
 networks:
   tamanna-internal:
     driver: bridge
 
 volumes:
   tamanna-data:
+  tamanna-tor-data:
