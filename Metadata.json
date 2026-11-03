@@ -25,9 +25,11 @@
 "domains": {
 "primary": "bd-king-r7.com",
 "www": "www.bd-king-r7.com",
+"legacyAliases": ["www.tamanna.com"],
 "allowedHosts": [
 "bd-king-r7.com",
-"www.bd-king-r7.com"
+"www.bd-king-r7.com",
+"www.tamanna.com"
 ],
 "forceCanonicalHost": "www.bd-king-r7.com"
 },
@@ -114,7 +116,7 @@
 },
 "github": {
 "enabled": true,
-"repository": "tamanna456760-it/Tamanna-",
+"repository": "tamanna456760-it/Tamanna-server",
 "branch": "main",
 "automaticDeployment": false,
 "requireTestsBeforeDeployment": true,
@@ -142,6 +144,6 @@
 "schemaVersion": "1.0",
 "owner": "HM INSAN ALI",
 "product": "Tamanna AI",
-"updatedAt": "2026-10-11"
+"updatedAt": "2026-11-03"
 }
 }
