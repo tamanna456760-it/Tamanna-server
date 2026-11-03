@@ -1,0 +1,45 @@
+# Tamanna Central Server configuration policy
+# Owner authority: HM INSAN ALI
+# Runtime secrets and deployment values must be supplied privately.
+
+owner:
+  name: "HM INSAN ALI"
+  authority: "configuration_owner"
+
+service:
+  name: "Tamanna Central Server"
+  bind_host: "127.0.0.1"
+  port: 8000
+  public_transport: "https_only"
+  health_endpoint: "/health"
+
+tamanna_ai_client:
+  service_url_env: "TAMANNA_SERVER_URL"
+  key_id_env: "TAMANNA_SERVER_KEY_ID"
+  shared_secret_env: "TAMANNA_SERVER_SHARED_SECRET"
+  protocol: "tamanna-service-protocol-v1"
+  require_hmac_signature: true
+  reject_replayed_nonces: true
+  forward_chat_content_by_default: false
+
+knowledge:
+  receive_only_authorized_reports: true
+  require_provenance: true
+  require_user_or_tenant_scope: true
+  reject_duplicate_content: true
+  redact_secrets: true
+  retain_license_and_source: true
+
+security:
+  fail_closed_when_replay_store_unavailable: true
+  never_log_secrets: true
+  no_public_shell_execution: true
+  no_unrestricted_file_write: true
+  rate_limit_required: true
+  strict_cors_allowlist_required: true
+
+operations:
+  audit_log_required: true
+  encrypted_backups_required: true
+  deployment_requires_ci_pass: true
+  destructive_actions_require_owner_approval: true
