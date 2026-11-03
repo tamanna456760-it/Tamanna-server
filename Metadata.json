@@ -18,18 +18,20 @@
 "host": "0.0.0.0",
 "port": 8080,
 "protocol": "https",
-"publicUrl": "https://www.tamanna.com",
+"publicUrl": "https://www.bd-king-r7.com",
 "redirectHttpToHttps": true,
 "trustProxy": false
 },
 "domains": {
-"primary": "tamanna.com",
-"www": "www.tamanna.com",
+"primary": "bd-king-r7.com",
+"www": "www.bd-king-r7.com",
+"legacyAliases": ["www.tamanna.com"],
 "allowedHosts": [
-"tamanna.com",
+"bd-king-r7.com",
+"www.bd-king-r7.com",
 "www.tamanna.com"
 ],
-"forceCanonicalHost": "www.tamanna.com"
+"forceCanonicalHost": "www.bd-king-r7.com"
 },
 "security": {
 "enabled": true,
@@ -40,8 +42,8 @@
 "cors": {
 "enabled": true,
 "allowedOrigins": [
-"https://tamanna.com",
-"https://www.tamanna.com"
+"https://bd-king-r7.com",
+"https://www.bd-king-r7.com"
 ],
 "allowCredentials": false
 },
@@ -114,7 +116,7 @@
 },
 "github": {
 "enabled": true,
-"repository": "tamanna456760-it/Tamanna-",
+"repository": "tamanna456760-it/Tamanna-server",
 "branch": "main",
 "automaticDeployment": false,
 "requireTestsBeforeDeployment": true,
@@ -142,6 +144,6 @@
 "schemaVersion": "1.0",
 "owner": "HM INSAN ALI",
 "product": "Tamanna AI",
-"updatedAt": "2026-10-11"
+"updatedAt": "2026-11-03"
 }
 }

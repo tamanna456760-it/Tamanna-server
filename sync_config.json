@@ -4,7 +4,7 @@
 "module": "Git Synchronization Engine",
 "version": "3.0.0",
 "owner": "HM INSAN ALI",
-"repository": "tamanna456760-it/Tamanna-",
+"repository": "tamanna456760-it/Tamanna-server",
 "sync": {
 "enabled": true,
 "auto_pull": true,
@@ -115,7 +115,7 @@
 },
 "deployment": {
 "automatic_deployment": false,
-"production_domain": "https://www.tamanna.com",
+"production_domain": "https://www.bd-king-r7.com",
 "require_successful_sync": true,
 "require_successful_tests": true,
 "require_approval": true

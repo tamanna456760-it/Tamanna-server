@@ -3,7 +3,7 @@
 "name": "Tamanna AI",
 "host": "0.0.0.0",
 "port": 8080,
-"publicUrl": "https://www.tamanna.com",
+"publicUrl": "https://www.bd-king-r7.com",
 "protocol": "https",
 "environment": "production",
 "trustProxy": 1
@@ -13,8 +13,8 @@
 "maxRequestsPerMinute": 120,
 "enableCORS": true,
 "allowedOrigins": [
-"https://www.tamanna.com",
-"https://tamanna.com"
+"https://www.bd-king-r7.com",
+"https://bd-king-r7.com"
 ],
 "helmet": true,
 "requireHttps": true,

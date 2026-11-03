@@ -8,19 +8,22 @@ It does **not** create a VPS, control DNS, issue certificates, or deploy itself.
 - Ubuntu 22.04/24.04 VPS (or equivalent Linux host)
 - Docker Engine with the Docker Compose plugin
 - Nginx and Certbot
-- DNS A records for `tamanna.com`, `www.tamanna.com`, `tamanna.io`, and `www.tamanna.io` pointing to this VPS
+- DNS for `bd-king-r7.com` and `www.bd-king-r7.com` pointing to this VPS; retain `www.tamanna.com` DNS pointing to the same origin for the legacy redirect
 - Firewall allowing inbound TCP 80 and 443; do not expose 8000 publicly
 
 Verify DNS before proceeding:
 ```sh
-dig +short A tamanna.com
+dig +short A bd-king-r7.com
+dig +short A www.bd-king-r7.com
 dig +short A www.tamanna.com
-dig +short A tamanna.io
-dig +short A www.tamanna.io
 ```
 If the VPS uses IPv6, configure matching AAAA records only when IPv6 is working end-to-end.
 
-## 2. Configure the application
+## 2. Domain and Cloudflare DNS
+
+The canonical website is `https://www.bd-king-r7.com`. Keep `www.tamanna.com` as a legacy alias that redirects to it. The `bd-king-r7.com` zone uses the Cloudflare nameservers assigned in the dashboard: `pablo.ns.cloudflare.com` and `uma.ns.cloudflare.com`. The separate `tamanna.com` DNS zone must also keep `www` pointed at this origin. A valid TLS certificate for `www.tamanna.com` is required before the HTTPS redirect can work. Do not publish a placeholder IP; use the real public IPv4 of the VPS.
+
+## 3. Configure the application
 
 ```sh
 git clone https://github.com/tamanna456760-it/Tamanna-server.git
@@ -39,7 +42,7 @@ Set at least (replace the values with your actual production configuration):
 - `APP_DEBUG=false`
 - `ORCHESTRATOR_TOKEN=<unique-random-value>`
 - `DATABASE_URL=sqlite:////app/data/reports.db`
-- `CORS_ORIGINS=https://www.tamanna.com` (replace the example origins; do not allow `*`)
+- `CORS_ORIGINS=https://bd-king-r7.com,https://www.bd-king-r7.com` (do not allow `*`; the legacy hostname only redirects)
 - `TRUST_PROXY=true` only when the API is reachable exclusively through the local trusted Nginx reverse proxy
 - `MAX_CONTENT_LENGTH=1048576`
 - `RATE_LIMIT_PER_MINUTE=60`
@@ -47,7 +50,7 @@ Set at least (replace the values with your actual production configuration):
 
 Keep `.env`, API keys, database files, TLS certificates, and private keys out of GitHub. Never paste a real token into an issue, chat, workflow file, or commit.
 
-## 3. Build and start the API
+## 4. Build and start the API
 
 ```sh
 docker compose config
@@ -61,7 +64,7 @@ curl --fail http://127.0.0.1:8000/health/ready
 
 Compose binds the API to host loopback `127.0.0.1:8000`. Keep it behind Nginx. The named `tamanna-data` volume stores the SQLite database.
 
-## 4. Issue TLS certificates
+## 5. Issue TLS certificates
 
 First install the temporary HTTP-only config:
 ```sh
@@ -72,12 +75,10 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-After all four DNS names resolve to this server, issue certificates:
+After the new canonical hosts and retained legacy alias resolve to this server, issue certificates:
 ```sh
-sudo certbot certonly --webroot -w /var/www/html \
-  -d tamanna.com -d www.tamanna.com
-sudo certbot certonly --webroot -w /var/www/html \
-  -d tamanna.io -d www.tamanna.io
+sudo certbot certonly --webroot -w /var/www/html -d bd-king-r7.com -d www.bd-king-r7.com
+sudo certbot certonly --webroot -w /var/www/html --cert-name www.tamanna.com -d www.tamanna.com
 ```
 
 Then install the production TLS virtual hosts:
@@ -90,7 +91,7 @@ sudo certbot renew --dry-run
 
 The Nginx configuration serves the website from `/var/www/tamanna/Wabsite`. Copy the repository's `Wabsite` directory to that path (or change the Nginx root to the actual deployment path). The API proxy preserves the `/api/` prefix.
 
-## 5. Firewall and verification
+## 6. Firewall and verification
 
 Allow only SSH (restricted to trusted IPs where possible), HTTP, and HTTPS. Example with UFW:
 ```sh
@@ -103,18 +104,19 @@ sudo ufw enable
 
 Verify from the server and an external network:
 ```sh
-curl -I https://www.tamanna.com/
-curl --fail https://www.tamanna.com/health
-curl --fail https://www.tamanna.com/health/ready
+curl -I https://www.bd-king-r7.com/
+curl --fail https://www.bd-king-r7.com/health
+curl --fail https://www.bd-king-r7.com/health/ready
+curl -I https://www.tamanna.com/  # expected: 301 to https://www.bd-king-r7.com/
 ```
 
 The health endpoints are public and intentionally return minimal information. API routes require:
 ```sh
 curl --fail -H "Authorization: Bearer $ORCHESTRATOR_TOKEN" \
-  https://www.tamanna.com/api/reports
+  https://www.bd-king-r7.com/api/reports
 ```
 
-## 6. Tests and maintenance
+## 7. Tests and maintenance
 
 Run local tests before deploying:
 ```sh

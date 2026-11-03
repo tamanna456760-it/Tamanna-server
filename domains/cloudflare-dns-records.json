@@ -1,0 +1,31 @@
+{
+  "zone": "bd-king-r7.com",
+  "provider": "Cloudflare",
+  "status": "pending",
+  "records": [
+    {
+      "type": "A",
+      "name": "@",
+      "content": "REPLACE_WITH_REAL_ORIGIN_IPV4",
+      "ttl": "auto",
+      "proxied": true,
+      "purpose": "Root website and origin address; replace placeholder only after the server public IPv4 is confirmed."
+    },
+    {
+      "type": "CNAME",
+      "name": "www",
+      "content": "bd-king-r7.com",
+      "ttl": "auto",
+      "proxied": true,
+      "purpose": "Canonical website hostname."
+    }
+  ],
+  "not_configured": [
+    "MX",
+    "SPF",
+    "DKIM",
+    "DMARC",
+    "AAAA"
+  ],
+  "safety": "This file documents intended DNS records only. It does not create records in Cloudflare. Do not publish the placeholder A record."
+}

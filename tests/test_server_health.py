@@ -11,10 +11,7 @@ def setup_function():
 def test_health_endpoint_is_public_and_minimal():
     response = server.app.test_client().get("/health")
     assert response.status_code == 200
-    assert response.get_json() == {
-        "status": "ok",
-        "service": "tamanna-central-server",
-    }
+    assert response.get_json() == {"status": "ok", "service": "tamanna-central-server"}
 
 
 def test_readiness_checks_database():
@@ -31,16 +28,14 @@ def test_public_root_does_not_expose_reports():
 
 
 def test_report_requires_authentication():
-    response = server.app.test_client().post(
-        "/api/report", json={"agent_id": "test"}
-    )
+    response = server.app.test_client().post("/api/report", json={"agent_id": "test"})
     assert response.status_code in (401, 503)
+
 
 def test_report_rejects_weak_server_token(monkeypatch):
     monkeypatch.setattr(server, "API_TOKEN", "weak-token")
     response = server.app.test_client().post(
-        "/api/report",
-        json={"agent_id": "test"},
+        "/api/report", json={"agent_id": "test"},
         headers={"Authorization": "Bearer weak-token"},
     )
     assert response.status_code == 503
@@ -50,9 +45,7 @@ def test_report_body_size_limit(monkeypatch):
     monkeypatch.setitem(server.app.config, "MAX_CONTENT_LENGTH", 8)
     monkeypatch.setattr(server, "API_TOKEN", TEST_TOKEN)
     response = server.app.test_client().post(
-        "/api/report",
-        data='{"agent_id":"too-long"}',
-        content_type="application/json",
+        "/api/report", data='{"agent_id":"too-long"}', content_type="application/json",
         headers={"Authorization": f"Bearer {TEST_TOKEN}"},
     )
     assert response.status_code == 413
@@ -61,8 +54,7 @@ def test_report_body_size_limit(monkeypatch):
 def test_report_rejects_wrong_token(monkeypatch):
     monkeypatch.setattr(server, "API_TOKEN", TEST_TOKEN)
     response = server.app.test_client().post(
-        "/api/report",
-        json={"agent_id": "test"},
+        "/api/report", json={"agent_id": "test"},
         headers={"Authorization": f"Bearer {WRONG_TOKEN}"},
     )
     assert response.status_code == 403
@@ -71,8 +63,7 @@ def test_report_rejects_wrong_token(monkeypatch):
 def test_report_accepts_valid_token(monkeypatch):
     monkeypatch.setattr(server, "API_TOKEN", TEST_TOKEN)
     response = server.app.test_client().post(
-        "/api/report",
-        json={"agent_id": "test", "branch": "test"},
+        "/api/report", json={"agent_id": "test", "branch": "test"},
         headers={"Authorization": f"Bearer {TEST_TOKEN}"},
     )
     assert response.status_code == 201
@@ -82,9 +73,7 @@ def test_report_accepts_valid_token(monkeypatch):
 def test_report_rejects_non_json_content(monkeypatch):
     monkeypatch.setattr(server, "API_TOKEN", TEST_TOKEN)
     response = server.app.test_client().post(
-        "/api/report",
-        data="agent_id=test",
-        content_type="text/plain",
+        "/api/report", data="agent_id=test", content_type="text/plain",
         headers={"Authorization": f"Bearer {TEST_TOKEN}"},
     )
     assert response.status_code == 415
@@ -93,8 +82,7 @@ def test_report_rejects_non_json_content(monkeypatch):
 def test_report_rejects_invalid_payload(monkeypatch):
     monkeypatch.setattr(server, "API_TOKEN", "ci-test-token")
     response = server.app.test_client().post(
-        "/api/report",
-        json={"agent_id": ""},
+        "/api/report", json={"agent_id": ""},
         headers={"Authorization": "Bearer ci-test-token"},
     )
     assert response.status_code == 400
@@ -108,8 +96,7 @@ def test_reports_endpoint_requires_authentication():
 def test_reports_endpoint_accepts_valid_token(monkeypatch):
     monkeypatch.setattr(server, "API_TOKEN", "ci-test-token")
     response = server.app.test_client().get(
-        "/api/reports",
-        headers={"Authorization": "Bearer ci-test-token"},
+        "/api/reports", headers={"Authorization": "Bearer ci-test-token"}
     )
     assert response.status_code == 200
     assert isinstance(response.get_json(), list)
@@ -123,11 +110,11 @@ def test_security_headers_are_present():
 
 
 def test_cors_only_allows_configured_origins(monkeypatch):
-    monkeypatch.setattr(server, "CORS_ORIGINS", {"https://www.tamanna.com"})
+    monkeypatch.setattr(server, "CORS_ORIGINS", {"https://www.bd-king-r7.com"})
     client = server.app.test_client()
-    allowed = client.get("/health", headers={"Origin": "https://www.tamanna.com"})
+    allowed = client.get("/health", headers={"Origin": "https://www.bd-king-r7.com"})
     blocked = client.get("/health", headers={"Origin": "https://evil.example"})
-    assert allowed.headers["Access-Control-Allow-Origin"] == "https://www.tamanna.com"
+    assert allowed.headers["Access-Control-Allow-Origin"] == "https://www.bd-king-r7.com"
     assert "Access-Control-Allow-Origin" not in blocked.headers
 
 
