@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import os
+import shlex
+import subprocess
 import time
 import hashlib
 import json
@@ -148,13 +150,27 @@ def run_build_commands():
     log("BUILD :: Starting build sequence...")
     for cmd in BUILD_COMMANDS:
         log(f"BUILD CMD :: {cmd}")
-        # Safe: using os.system. You can replace with subprocess if you want more control.
-        exit_code = os.system(cmd)
-        if exit_code == 0:
-            log(f"BUILD OK :: {cmd}")
-        else:
-            log(f"BUILD FAIL ({exit_code}) :: {cmd}")
+        try:
+            argv = shlex.split(cmd)
+            if not argv:
+                log("BUILD SKIP :: empty command")
+                continue
+            result = subprocess.run(
+                argv,
+                cwd=BD_KING_ROOT,
+                check=False,
+                timeout=300,
+            )
+            if result.returncode == 0:
+                log(f"BUILD OK :: {shlex.join(argv)}")
+            else:
+                log(f"BUILD FAIL ({result.returncode}) :: {shlex.join(argv)}")
+                return False
+        except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+            log(f"BUILD ERROR :: {type(exc).__name__}")
+            return False
     log("BUILD :: Completed build sequence.")
+    return True
 
 
 # ================== MAIN LOOP ==================================
