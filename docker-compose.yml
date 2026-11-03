@@ -12,7 +12,7 @@ services:
       APP_ENV: "${APP_ENV:-production}"
       HOST: "0.0.0.0"
       PORT: "8000"
-      TRUST_PROXY: "${TRUST_PROXY:-true}"
+      TRUST_PROXY: "${TRUST_PROXY:-false}"
       ORCHESTRATOR_TOKEN: "${ORCHESTRATOR_TOKEN:?Set ORCHESTRATOR_TOKEN in .env}"
       DATABASE_URL: "${DATABASE_URL:-sqlite:////app/data/reports.db}"
       PYTHONUNBUFFERED: "1"
@@ -40,6 +40,29 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      - tamanna-internal
+
+  website:
+    build:
+      context: .
+      dockerfile: Dockerfile.website
+    container_name: tamanna-website
+    restart: unless-stopped
+    environment:
+      WEB_HOST: "0.0.0.0"
+      WEB_PORT: "3000"
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    init: true
+    security_opt:
+      - no-new-privileges:true
     networks:
       - tamanna-internal
 
