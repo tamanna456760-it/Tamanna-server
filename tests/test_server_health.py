@@ -59,12 +59,12 @@ def test_report_accepts_valid_token(monkeypatch):
 
 
 def test_report_rejects_non_json_content(monkeypatch):
-    monkeypatch.setattr(server, "API_TOKEN", "ci-test-token")
+    monkeypatch.setattr(server, "API_TOKEN", TEST_TOKEN)
     response = server.app.test_client().post(
         "/api/report",
         data="agent_id=test",
         content_type="text/plain",
-        headers={"Authorization": "Bearer ci-test-token"},
+        headers={"Authorization": f"Bearer {TEST_TOKEN}"},
     )
     assert response.status_code == 415
 
