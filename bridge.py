@@ -78,11 +78,12 @@ def register_bridge(app, engine, Session):
                 db = Session()
                 try:
                     row = db.query(BridgeMessage).filter_by(idempotency_key=idem).one_or_none()
+                    created = row is None
                     if row is None:
                         now = datetime.now(timezone.utc)
                         row = BridgeMessage(id=secrets.token_hex(16), conversation_id=conv, idempotency_key=idem, status="queued", message_text=text_value, created_at=now, updated_at=now)
                         db.add(row); db.commit()
-                    result = {"message_id":row.id,"status":row.status,"duplicate_submission":row.idempotency_key == idem}
+                    result = {"message_id":row.id,"status":row.status,"duplicate_submission":not created}
                 finally:
                     db.close()
                 return jsonify({"jsonrpc":"2.0","id":rid,"result":{"content":[{"type":"text","text":json.dumps(result)}]}})
@@ -105,12 +106,17 @@ def register_bridge(app, engine, Session):
         require_service()
         db = Session()
         try:
-            row = db.query(BridgeMessage).filter_by(status="queued").order_by(BridgeMessage.created_at.asc()).with_for_update().first()
-            if row is None:
+            from sqlalchemy import update
+            candidate = db.query(BridgeMessage).filter_by(status="queued").order_by(BridgeMessage.created_at.asc()).first()
+            if candidate is None:
                 return jsonify({"status":"empty"}), 200
-            row.status = "processing"; row.updated_at = datetime.now(timezone.utc)
-            result = {"message_id":row.id,"conversation_id":row.conversation_id,"text":row.message_text}
+            now = datetime.now(timezone.utc)
+            claimed = db.execute(update(BridgeMessage).where(BridgeMessage.id == candidate.id, BridgeMessage.status == "queued").values(status="processing", updated_at=now))
             db.commit()
+            if claimed.rowcount != 1:
+                return jsonify({"status":"empty"}), 200
+            row = db.query(BridgeMessage).filter_by(id=candidate.id).one()
+            result = {"message_id":row.id,"conversation_id":row.conversation_id,"text":row.message_text}
             return jsonify(result), 200
         finally:
             db.close()
