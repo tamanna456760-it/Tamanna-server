@@ -105,66 +105,19 @@
 	<input type="password" id="pwd" placeholder="password here">
   </div>
 
-  <button id="btnLogin" onclick="doLogin()">Login</button>
+  <button id="btnLogin" type="button" disabled>Login unavailable</button>
 
   <div class="errMsg" id="errMsg"></div>
 </div>
 
 <script>
-  const myUser = "user";  
-  const myPass = "pass123";  
-
-  let tryCount = 0;  
-  const maxTry = 3;  
-  const lockSec = 10;  
-  let interval;
-
-  function doLogin() {
-	const u = document.getElementById('user').value;
-	const p = document.getElementById('pwd').value;
-	const err = document.getElementById('errMsg');
-	const btn = document.getElementById('btnLogin');
-
-	if (tryCount >= maxTry) { 
-	// lock if too many tries
-	  err.textContent = `Too many tries. Wait ${lockSec} sec.`;
-	  return;
-	}
-
-	if (u === myUser && p === myPass) { 
-	// correct login
-	  alert("Logged in!");
-	  tryCount = 0;
-	  err.textContent = "";
-	} else { 
-	// wrong login
-	  tryCount++;
-	  let left = maxTry - tryCount;
-
-	  if (left > 0) {
-		err.textContent = `Wrong. ${left} try left.`;
-	  } else { 
-	  // lock button
-		err.textContent = `Locked for ${lockSec} sec.`;
-		btn.disabled = true;
-
-		let secLeft = lockSec;
-
-		interval = setInterval(() => {
-		  secLeft--;
-		  err.textContent = `Locked for ${secLeft} sec.`;
-
-		  if (secLeft <= 0) {
-			clearInterval(interval);
-			tryCount = 0;
-			btn.disabled = false;
-			err.textContent = "";
-		  }
-		}, 1000);
-
-	  }
-	}
-  }
+  // This legacy page has no server-side identity provider.
+  // Keep it disabled rather than pretending client-side credentials are secure.
+  document.getElementById("user").disabled = true;
+  document.getElementById("pwd").disabled = true;
+  document.getElementById("btnLogin").disabled = true;
+  document.getElementById("errMsg").textContent =
+    "Login is unavailable: connect a secure server-side authentication service first.";
 </script>
 
 </body>
