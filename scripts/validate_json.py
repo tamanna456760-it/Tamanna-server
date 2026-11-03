@@ -1,10 +1,14 @@
-"""Validate tracked JSON files and reject duplicate object keys."""
+"""Validate repository JSON files and reject duplicate object keys."""
 import json
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+IGNORED_DIRS = {
+    ".git", ".venv", "venv", "node_modules", "__pycache__",
+    "bin", "obj", "build", "dist",
+}
 
 
 def reject_duplicate_keys(pairs):
@@ -17,6 +21,7 @@ def reject_duplicate_keys(pairs):
 
 
 def tracked_json_files():
+    """Read git's NUL-delimited path list safely, including spaces in names."""
     try:
         result = subprocess.run(
             ["git", "ls-files", "-z", "--", "*.json"],
@@ -24,17 +29,19 @@ def tracked_json_files():
             check=True,
             capture_output=True,
         )
-        names = result.stdout.decode("utf-8").split("\\0")
-        files = [ROOT / name for name in names if name]
-        if files:
-            return sorted(files)
+        names = [
+            item.decode("utf-8")
+            for item in result.stdout.split(b"\0")
+            if item
+        ]
+        if names:
+            return sorted(ROOT / name for name in names)
     except (OSError, subprocess.CalledProcessError, UnicodeError):
         pass
 
-    ignored = {".git", ".venv", "venv", "node_modules", "__pycache__", "bin", "obj", "build", "dist"}
     return sorted(
         path for path in ROOT.rglob("*.json")
-        if not any(part in ignored for part in path.relative_to(ROOT).parts)
+        if not any(part in IGNORED_DIRS for part in path.relative_to(ROOT).parts)
     )
 
 
@@ -54,7 +61,7 @@ def main():
         print(f"FAIL: {len(failures)} invalid JSON file(s) out of {len(files)}")
         return 1
 
-    print(f"PASS: {len(files)} tracked JSON file(s) are valid (duplicate keys checked)")
+    print(f"PASS: {len(files)} JSON file(s) valid; duplicate keys checked")
     return 0
 
 
