@@ -51,8 +51,8 @@ def protect_analytics_api():
     if request.path not in protected_paths:
         return None
     expected = os.environ.get("ANALYTICS_API_TOKEN", "")
-    if not expected:
-        abort(503, description="Analytics API is not configured")
+    if len(expected) < 32:
+        abort(503, description="Analytics API token is missing or too short")
     authorization = request.headers.get("Authorization", "")
     scheme, separator, supplied = authorization.partition(" ")
     if not separator or scheme.lower() != "bearer":
