@@ -41,6 +41,10 @@ engine = create_engine(
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 app = Flask(__name__)
+
+# Authenticated ChatGPT MCP bridge and Tamanna service message queue.
+from bridge import register_bridge
+register_bridge(app, engine, Session)
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 if TRUST_PROXY:
     # Enable only when the app is reachable exclusively through trusted reverse proxies.
