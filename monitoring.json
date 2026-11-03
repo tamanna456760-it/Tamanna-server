@@ -3,11 +3,11 @@
     "name": "BD-King-R7 Code Monitor",
     "version": "2.1.0",
     "description": "Real-time code quality, security, and performance monitoring system",
-    "mode": "active",
-    "status": "running"
+    "mode": "configuration_only",
+    "status": "not_started"
   },
   "real_time_monitoring": {
-    "enabled": true,
+    "enabled": false,
     "polling_interval_seconds": 5,
     "file_change_detection": true,
     "instant_alerts": true,
@@ -87,8 +87,8 @@
     "track_new_files": true
   },
   "alert_system": {
-    "enabled": true,
-    "channels": ["console", "log_file", "email", "webhook"],
+    "enabled": false,
+    "channels": ["console", "log_file"],
     "severity_levels": {
       "critical": ["security_breach", "system_failure", "data_loss"],
       "high": [
@@ -106,7 +106,7 @@
         "smtp_server": "smtp.company.com"
       },
       "webhook": {
-        "enabled": true,
+        "enabled": false,
         "url": "https://api.company.com/alerts",
         "timeout_seconds": 10
       }
@@ -186,7 +186,7 @@
         "description": "Ensure proper exception handling",
         "pattern": "(try:)|(except.*:)|(catch.*{)",
         "severity": "medium",
-        "auto_fix": true
+        "auto_fix": false
       }
     ],
     "quality_gates": {
