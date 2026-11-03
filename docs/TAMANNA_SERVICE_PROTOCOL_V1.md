@@ -65,7 +65,7 @@ Success is HTTP 201 with status, id, and protocol in JSON. Authentication failur
 - Synchronize clocks (NTP); default allowed skew is 300 seconds.
 - Rotate shared secrets deliberately on both services.
 - Restrict each service identity to only the endpoints it needs.
-- Current nonce replay protection is process-local. Before running multiple Gunicorn workers, replicas, or server hosts in production, replace it with a shared atomic nonce store (for example Redis SET NX with expiry or a database unique constraint). The current in-memory guard is not a distributed replay defense.
+- Docker Compose configures an internal Redis service and the server uses atomic Redis SET NX with an expiry for replay protection across workers. Redis is not published to the host. If Redis is configured but unavailable, authentication fails closed. Local development without Redis falls back to a process-local nonce cache; do not use that fallback for multi-worker or multi-host production.
 - Add rate limiting at the reverse proxy/WAF for production. The existing Flask API limiter is per-process and not a substitute for distributed edge controls.
 - Do not send passwords, user chat content, API keys, or private account data in report payloads.
 
