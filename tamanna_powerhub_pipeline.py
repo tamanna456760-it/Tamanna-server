@@ -1,60 +1,60 @@
-from datetime import datetime
+#!/usr/bin/env python3
+"""Run real repository checks; never fabricate test, scan, or signing results."""
+import shutil
+import subprocess
+import sys
+from pathlib import Path
 
-def log(msg):
-    print(msg)
+ROOT = Path(__file__).resolve().parent
+PYTHON = sys.executable
 
-def verify_identity():
-    return {
-        "developer_id": "tamanna456760-it",
-        "verified": True,
-        "trust_level": "high"
-    }
+CHECKS = [
+    ("Python syntax", [PYTHON, "-m", "compileall", "-q",
+                       "app.py", "server.py", "agent.py", "apps.py",
+                       "synce.py", "tests", "scripts"]),
+    ("JSON validation", [PYTHON, "scripts/validate_json.py"]),
+    ("Domain configuration", [PYTHON, "scripts/validate_domains.py"]),
+    ("Python tests", [PYTHON, "-m", "pytest", "-q"]),
+]
 
-def ephemeral_build():
-    log("🔧 Ephemeral build started")
-    log("🧨 Build VM destroyed after completion")
 
-def automated_tests():
-    return {"unit": "pass", "integration": "pass", "policy": "pass"}
+def main():
+    failures = 0
+    for label, command in CHECKS:
+        print(f"\n== {label} ==")
+        result = subprocess.run(
+            command,
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=300,
+            check=False,
+        )
+        print(result.stdout or "(no output)")
+        print(f"{'PASS' if result.returncode == 0 else 'FAIL'}: {label}")
+        failures += result.returncode != 0
 
-def vulnerability_scan():
-    return {"vulnerabilities": 0, "risk_level": "low"}
+    if shutil.which("pip-audit"):
+        print("\n== Dependency audit ==")
+        result = subprocess.run(
+            ["pip-audit", "-r", "requirements.txt"],
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=300,
+            check=False,
+        )
+        print(result.stdout or "(no output)")
+        print(f"{'PASS' if result.returncode == 0 else 'FAIL'}: Dependency audit")
+        failures += result.returncode != 0
+    else:
+        print("\nSKIP: pip-audit is not installed; no vulnerability result is claimed.")
 
-def ai_risk_analysis():
-    return {"ai_risk_score": 9.6}
+    print(f"\nRESULT: {failures} check(s) failed.")
+    return 1 if failures else 0
 
-def create_attestation():
-    return {
-        "attested": True,
-        "timestamp": datetime.utcnow().isoformat() + "Z"
-    }
 
-def binary_authorization(attestation):
-    if not attestation["attested"]:
-        raise Exception("❌ Deployment blocked")
-
-def artifact_registry():
-    return {"artifact": "app-release", "immutable": True}
-
-def cas_signing():
-    return {"signed": True, "key_origin": "CAS"}
-
-def device_verification():
-    return {"device_verification": "passed", "update_status": "installed"}
-
-# ---------- EXECUTION ----------
-identity = verify_identity()
-ephemeral_build()
-
-tests = automated_tests()
-scan = vulnerability_scan()
-ai = ai_risk_analysis()
-
-attestation = create_attestation()
-binary_authorization(attestation)
-
-artifact = artifact_registry()
-signature = cas_signing()
-device = device_verification()
-
-log("✅ TAMANNA SYSTEM UPDATE PIPELINE COMPLETE")
+if __name__ == "__main__":
+    raise SystemExit(main())
