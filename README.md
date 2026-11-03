@@ -471,3 +471,43 @@ The .NET API requires the environment variable `Orchestrator__Token`; there is n
 - `Dns/db.tamanna.io` contains documentation-only TEST-NET addresses. Replace them with assigned public addresses before publishing DNS; do not use the sample zone as live DNS.
 - The root-level `deply.yml` is not an active GitHub Actions workflow. Review its target paths and deletion behavior before using any manual deployment process.
 - A successful CI run validates the checked-in tests and build steps only. It does not prove that the live website, DNS, TLS, server, or data backups work.
+
+
+# Tamanna AI — Local quick start
+
+## Start the website and API together
+
+Requirements: Docker Engine or Docker Desktop with the Compose plugin.
+
+- Windows: double-click start-local.bat (or run ./start-local.ps1 in PowerShell).
+- Linux/macOS: run chmod +x start-local.sh && ./start-local.sh.
+- Any platform: run docker compose up --build -d from this folder after creating the private .env file.
+
+The first start creates a private .env file from .env.example and generates a random ORCHESTRATOR_TOKEN if one is not already present. The token stays on the local machine and must never be committed.
+
+When both containers are healthy, open:
+- Website: http://127.0.0.1:3000
+- API health: http://127.0.0.1:8000/health
+- API readiness: http://127.0.0.1:8000/health/ready
+
+The website and API are bound to localhost by default; they are not exposed to your LAN or the public internet. Docker is required for the one-command launcher. The website is a static landing site; the API currently provides health and authenticated report endpoints, not a complete AI chat UI.
+
+## Stop and inspect
+
+    docker compose ps
+    docker compose logs --tail=100
+    docker compose down
+
+Data is stored in the Docker volume tamanna-data and survives container recreation. docker compose down -v deletes that volume; do not use it unless you intentionally want to delete local application data.
+
+## Troubleshooting
+
+- Install Docker Desktop (Windows/macOS) or Docker Engine + Compose plugin (Linux).
+- Make sure ports 3000 and 8000 are free.
+- If startup fails: docker compose logs --tail=150.
+- To rebuild after pulling code updates: git pull --ff-only && docker compose up --build -d.
+- To rotate the local API token, stop the stack, update ORCHESTRATOR_TOKEN in .env with a new random value of at least 32 characters, then run docker compose up -d --force-recreate.
+
+## Production domain
+
+Local startup does not publish the application to www.bd-king-r7.com. Public hosting still requires a VPS/origin IP, Cloudflare DNS, firewall, Nginx, and valid TLS certificates. Follow deploy/README.md only after those prerequisites are available.
