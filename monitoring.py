@@ -10,7 +10,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import psutil
 from watchdog.events import FileSystemEventHandler
@@ -21,21 +21,21 @@ from watchdog.observers import Observer
 class CodeMetric:
     """Code quality metrics data class"""
 
-    cyclomatic_complexity: float
-    maintainability_index: float
-    code_duplication_percent: float
-    comment_density_percent: float
-    technical_debt_ratio: float
+    cyclomatic_complexity: Optional[float]
+    maintainability_index: Optional[float]
+    code_duplication_percent: Optional[float]
+    comment_density_percent: Optional[float]
+    technical_debt_ratio: Optional[float]
 
 
 @dataclass
 class SecurityMetric:
     """Security metrics data class"""
 
-    vulnerabilities_count: int
-    secrets_detected: int
-    dependency_issues: int
-    security_score: float
+    vulnerabilities_count: Optional[int]
+    secrets_detected: Optional[int]
+    dependency_issues: Optional[int]
+    security_score: Optional[float]
 
 
 @dataclass
@@ -52,7 +52,7 @@ class MonitoringEvent:
 class CodeMonitor:
     """Advanced code monitoring system"""
 
-    def __init__(self, config_path: str = "code.monitoring.json"):
+    def __init__(self, config_path: str = "monitoring.json"):
         self.config = self.load_config(config_path)
         self.setup_logging()
         self.observer = Observer()
@@ -227,59 +227,38 @@ class CodeMonitor:
             logging.error(f"Full scan failed: {e}")
 
     def analyze_code_quality(self) -> CodeMetric:
-        """Analyze code quality metrics"""
-        # This would integrate with tools like pylint, radon, etc.
-        # For now, return mock data
+        """Return unknown metrics until a real analyzer is integrated."""
         return CodeMetric(
-            cyclomatic_complexity=8.5,
-            maintainability_index=72.3,
-            code_duplication_percent=3.2,
-            comment_density_percent=15.8,
-            technical_debt_ratio=0.8,
+            cyclomatic_complexity=None,
+            maintainability_index=None,
+            code_duplication_percent=None,
+            comment_density_percent=None,
+            technical_debt_ratio=None,
         )
 
     def analyze_security(self) -> SecurityMetric:
-        """Analyze security metrics"""
-        # This would integrate with security scanning tools
+        """Never fabricate vulnerability counts or security scores."""
         return SecurityMetric(
-            vulnerabilities_count=2,
-            secrets_detected=0,
-            dependency_issues=1,
-            security_score=85.5,
+            vulnerabilities_count=None,
+            secrets_detected=None,
+            dependency_issues=None,
+            security_score=None,
         )
 
-    def analyze_test_coverage(self) -> Dict[str, float]:
-        """Analyze test coverage"""
-        # This would integrate with coverage tools
-        return {
-            "line_coverage_percent": 78.5,
-            "branch_coverage_percent": 65.2,
-            "function_coverage_percent": 82.1,
-        }
+    def analyze_test_coverage(self) -> Dict[str, Any]:
+        """Coverage is unknown until pytest-cov or another coverage tool is run."""
+        return {"status": "not_measured", "source": None}
 
     def detect_issues(self) -> List[Dict[str, Any]]:
-        """Detect code issues based on custom rules"""
-        issues = []
-        custom_rules = self.config.get(
-            "custom_rules", {}).get("business_rules", [])
-
-        for rule in custom_rules:
-            # Implement rule checking logic here
-            # This would scan files for patterns and create issues
-            pass
-
-        return issues
+        """Report the missing implementation instead of returning a false clean scan."""
+        return [{
+            "severity": "unknown",
+            "message": "Custom rule scanning is not implemented; no clean result can be claimed.",
+        }]
 
     def get_recent_changes(self) -> Dict[str, Any]:
-        """Get recent code changes"""
-        # This would integrate with git to get recent changes
-        return {
-            "files_modified": 5,
-            "lines_added": 120,
-            "lines_deleted": 45,
-            "files_added": ["new_feature.py"],
-            "files_deleted": [],
-        }
+        """Recent change metrics are unknown until a Git diff analyzer is integrated."""
+        return {"status": "not_measured"}
 
     def get_current_branch(self) -> str:
         """Get current git branch"""
@@ -343,33 +322,28 @@ class CodeMonitor:
             self.send_webhook_alert(alert)
 
     def send_webhook_alert(self, alert: Dict[str, Any]):
-        """Send alert to webhook"""
-        # Implement webhook notification
-        pass
+        """Webhook delivery is not configured; do not report an alert as delivered."""
+        logging.warning("Webhook notification skipped: no delivery implementation configured")
 
     def check_quality_gates(self, event_data: Dict[str, Any]):
-        """Check quality gates and trigger alerts if failed"""
-        quality_gates = self.config["custom_rules"]["quality_gates"]
-        metrics = event_data["metrics"]
-
-        # Check pre-commit quality gates
-        if (
-            metrics["coverage"]["line_coverage_percent"]
-            < quality_gates["pre_commit"]["min_test_coverage"]
-        ):
+        """Evaluate only metrics that were actually measured."""
+        quality_gates = self.config.get("custom_rules", {}).get("quality_gates", {})
+        metrics = event_data.get("metrics", {})
+        coverage = metrics.get("coverage", {}).get("line_coverage_percent")
+        min_coverage = quality_gates.get("pre_commit", {}).get("min_test_coverage")
+        if coverage is not None and min_coverage is not None and coverage < min_coverage:
             self.trigger_alert(
                 "low_test_coverage",
-                f"Test coverage {metrics['coverage']['line_coverage_percent']}% below minimum {quality_gates['pre_commit']['min_test_coverage']}%",
+                f"Test coverage {coverage}% below minimum {min_coverage}%",
                 "medium",
             )
 
-        if (
-            metrics["code_quality"]["cyclomatic_complexity"]
-            > quality_gates["pre_commit"]["max_complexity"]
-        ):
+        complexity = metrics.get("code_quality", {}).get("cyclomatic_complexity")
+        max_complexity = quality_gates.get("pre_commit", {}).get("max_complexity")
+        if complexity is not None and max_complexity is not None and complexity > max_complexity:
             self.trigger_alert(
                 "high_complexity",
-                f"Code complexity {metrics['code_quality']['cyclomatic_complexity']} above maximum {quality_gates['pre_commit']['max_complexity']}",
+                f"Code complexity {complexity} above maximum {max_complexity}",
                 "medium",
             )
 
