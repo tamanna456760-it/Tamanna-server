@@ -189,20 +189,24 @@ class Agent:
                     raise RuntimeError("fast-forward update failed; refusing destructive reset")
 
             fixer_out = []
+            build_ok = True
             for command in self.fix_cmds:
                 if command.strip():
                     rc, output = run(command, cwd=str(self.repo_path))
                     fixer_out.append({"cmd": command, "rc": rc, "out": output})
-
-            build_ok = True
-            build_out = []
-            for command in self.build_cmds:
-                if command.strip():
-                    rc, output = run(command, cwd=str(self.repo_path))
-                    build_out.append({"cmd": command, "rc": rc, "out": output})
                     if rc != 0:
                         build_ok = False
                         break
+
+            build_out = []
+            if build_ok:
+                for command in self.build_cmds:
+                    if command.strip():
+                        rc, output = run(command, cwd=str(self.repo_path))
+                        build_out.append({"cmd": command, "rc": rc, "out": output})
+                        if rc != 0:
+                            build_ok = False
+                            break
 
             uid = str(uuid.uuid4())
             (self.repo_path / self.ficar).parent.mkdir(parents=True, exist_ok=True)
