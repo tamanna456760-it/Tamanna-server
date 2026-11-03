@@ -415,3 +415,58 @@ Owner Attribution: HM INSAN ALI
 Repository: https://github.com/tamanna456760-it/Tamanna-server
 
 Building a secure, independent and scalable foundation for the Tamanna AI ecosystem.
+
+---
+
+## 23. Verified runtime entry points and repository audit notes
+
+The repository currently contains multiple historical applications. They are **not one integrated server** and must not all be started together.
+
+| Entry point | Purpose | Current status |
+|---|---|---|
+| `app.py` / `server.py` | Primary Flask report API on port 8000 | Current Compose service |
+| `Wabsite/Index.html` | Public static website | Served by the Nginx configuration |
+| `server.js` | Optional Node static-site preview on port 3000 | Syntax and integration tests in CI |
+| `program.cs` | Separate .NET report API | Security-hardened; build checked in CI |
+| `agent.py` | Optional local Git automation agent | Shell execution removed; requires trusted local YAML config |
+| `apps.py` | Legacy analytics application | Not in Compose; requires the missing `bd_king_ai` module and its optional data-science dependencies |
+| `synce.py` | Legacy medical/Google integration | Not in Compose; requires missing `google_sync` and `master_doctor_ai` modules and private credentials |
+| `main.py` | Old sample worker | Not the web-server entry point |
+
+Do not deploy `apps.py` or `synce.py` as production services until their missing modules, authentication model, data handling, and dependencies have been independently implemented and tested. The medical integration must not be exposed publicly without a proper identity, authorization, privacy, and audit design.
+
+### Local verification
+
+Python:
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+python scripts/validate_json.py
+python scripts/validate_domains.py
+python -m compileall -q app.py server.py agent.py apps.py synce.py tests scripts
+python -m pytest -q
+```
+
+Node website preview (Node.js 20+):
+```sh
+npm test
+npm start
+```
+
+.NET alternative:
+```sh
+dotnet restore bd-king-orchestrator.csproj
+dotnet build bd-king-orchestrator.csproj --configuration Release
+```
+
+The .NET API requires the environment variable `Orchestrator__Token`; there is no default token. The Python Compose service requires `ORCHESTRATOR_TOKEN`. Use different strong random values for different services.
+
+### Deployment boundaries
+
+- The Compose stack starts the Python API only. It does not provision Nginx, DNS, TLS, Tor, PostgreSQL, or the legacy applications.
+- The Node server is a local static-site preview; production Nginx serves the website files directly.
+- The .NET API is an alternative service, not automatically deployed by the Python Compose stack.
+- `Dns/db.tamanna.io` contains documentation-only TEST-NET addresses. Replace them with assigned public addresses before publishing DNS; do not use the sample zone as live DNS.
+- The root-level `deply.yml` is not an active GitHub Actions workflow. Review its target paths and deletion behavior before using any manual deployment process.
+- A successful CI run validates the checked-in tests and build steps only. It does not prove that the live website, DNS, TLS, server, or data backups work.
