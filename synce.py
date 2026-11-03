@@ -124,8 +124,9 @@ def google_callback():
                 {"status": "success", "message": "Google authentication successful"}
             )
         return jsonify({"error": "No authorization code"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Legacy application operation failed")
+        return jsonify({"error": "operation failed"}), 500
 
 
 @app.route("/api/google/sync/upload", methods=["POST"])
@@ -148,8 +149,9 @@ def google_upload():
         )
 
         return jsonify({"status": "success", "file_id": result["id"]})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Legacy application operation failed")
+        return jsonify({"error": "operation failed"}), 500
 
 
 @app.route("/api/google/sync/download", methods=["POST"])
@@ -173,8 +175,9 @@ def google_download():
                 session["google_credentials"]
             )
             return jsonify({"status": "success", "files": files})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Legacy application operation failed")
+        return jsonify({"error": "operation failed"}), 500
 
 
 @app.route("/api/google/sync/sheets", methods=["POST"])
@@ -199,8 +202,9 @@ def google_sheets_sync():
             )
         else:
             return jsonify({"error": "Missing spreadsheet_id or data"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Legacy application operation failed")
+        return jsonify({"error": "operation failed"}), 500
 
 
 # Medical Analysis Endpoints
@@ -248,8 +252,9 @@ def analyze_medical_data():
 
         return jsonify({"error": "Invalid file type"}), 400
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Legacy application operation failed")
+        return jsonify({"error": "operation failed"}), 500
 
 
 @app.route("/api/analyze/symptoms", methods=["POST"])
@@ -273,8 +278,9 @@ def analyze_symptoms():
             }
         )
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Legacy application operation failed")
+        return jsonify({"error": "operation failed"}), 500
 
 
 @app.route("/api/analyze/lab_results", methods=["POST"])
@@ -298,8 +304,9 @@ def analyze_lab_results():
             }
         )
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Legacy application operation failed")
+        return jsonify({"error": "operation failed"}), 500
 
 
 @app.route("/api/predict/disease", methods=["POST"])
@@ -323,8 +330,9 @@ def predict_disease_risk():
             }
         )
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Legacy application operation failed")
+        return jsonify({"error": "operation failed"}), 500
 
 
 @app.route("/api/visualize/medical", methods=["POST"])
@@ -355,8 +363,9 @@ def create_medical_visualizations():
 
         return jsonify({"error": "Invalid file"}), 400
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Legacy application operation failed")
+        return jsonify({"error": "operation failed"}), 500
 
 
 @app.route("/api/system/status")
