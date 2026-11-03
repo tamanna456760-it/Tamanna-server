@@ -86,3 +86,21 @@ jobs:
             -H 'Authorization: Bearer ci-test-token' \
             -H 'Content-Type: application/json' \
             -d '{"agent_id":"ci-smoke","branch":"main"}'
+
+  website-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Syntax-check website server
+        run: node --check server.js
+
+      - name: Test static website server
+        run: npm test
