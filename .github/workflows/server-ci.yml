@@ -56,7 +56,7 @@ jobs:
 
       - name: Run API tests
         env:
-          ORCHESTRATOR_TOKEN: ci-test-token
+          ORCHESTRATOR_TOKEN: tamanna-ci-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
           DATABASE_URL: sqlite://
           CORS_ORIGINS: https://www.tamanna.com
         run: python -m pytest -q
@@ -64,7 +64,7 @@ jobs:
       - name: Validate Docker Compose configuration
         run: |
           cp .env.example .env
-          ORCHESTRATOR_TOKEN=ci-test-token docker compose config --quiet
+          ORCHESTRATOR_TOKEN=tamanna-ci-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx docker compose config --quiet
 
       - name: Build production container
         run: docker build --pull -f dockerfile -t tamanna-server-ci .
@@ -76,7 +76,7 @@ jobs:
           trap 'docker rm -f tamanna-server-ci >/dev/null 2>&1 || true' EXIT
           docker run -d --name tamanna-server-ci \
             -p 127.0.0.1:18000:8000 \
-            -e ORCHESTRATOR_TOKEN=ci-test-token \
+            -e ORCHESTRATOR_TOKEN=tamanna-ci-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
             -e DATABASE_URL=sqlite:////app/data/ci.db \
             tamanna-server-ci
           ready=0
@@ -91,7 +91,7 @@ jobs:
           curl --fail http://127.0.0.1:18000/health/ready
           curl --fail --silent --show-error \
             -X POST http://127.0.0.1:18000/api/report \
-            -H 'Authorization: Bearer ci-test-token' \
+            -H 'Authorization: Bearer tamanna-ci-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' \
             -H 'Content-Type: application/json' \
             -d '{"agent_id":"ci-smoke","branch":"main"}'
 
