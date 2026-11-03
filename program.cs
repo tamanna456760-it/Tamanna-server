@@ -41,7 +41,7 @@ bool IsAuthorized(HttpRequest request, IConfiguration configuration)
     if (string.IsNullOrWhiteSpace(expected))
         return false;
 
-    var authorization = request.Headers.Authorization.ToString();
+    var authorization = request.Headers["Authorization"].ToString();
     if (!authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
         return false;
 
@@ -60,7 +60,7 @@ app.MapGet("/health", () => Results.Ok(new
     service = "tamanna-dotnet-orchestrator"
 }));
 
-app.MapGet("/health/ready", async (AppDbContext db) =>
+app.MapGet("/health/ready", async Task<IResult> (AppDbContext db) =>
 {
     try
     {
@@ -74,7 +74,7 @@ app.MapGet("/health/ready", async (AppDbContext db) =>
     }
 });
 
-app.MapPost("/api/report", async (HttpRequest request, AppDbContext db, IConfiguration cfg, ILogger<Program> logger) =>
+app.MapPost("/api/report", async Task<IResult> (HttpRequest request, AppDbContext db, IConfiguration cfg, ILogger<Program> logger) =>
 {
     if (string.IsNullOrWhiteSpace(cfg["Orchestrator:Token"]))
         return Results.Json(new { error = "server authentication is not configured" }, statusCode: 503);
@@ -124,7 +124,7 @@ app.MapPost("/api/report", async (HttpRequest request, AppDbContext db, IConfigu
     }
 });
 
-app.MapGet("/api/reports", async (HttpRequest request, AppDbContext db, IConfiguration cfg) =>
+app.MapGet("/api/reports", async Task<IResult> (HttpRequest request, AppDbContext db, IConfiguration cfg) =>
 {
     if (string.IsNullOrWhiteSpace(cfg["Orchestrator:Token"]))
         return Results.Json(new { error = "server authentication is not configured" }, statusCode: 503);
