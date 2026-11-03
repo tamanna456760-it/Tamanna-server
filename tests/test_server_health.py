@@ -1,5 +1,8 @@
 import app as server
 
+TEST_TOKEN = "tamanna-ci-token-" + ("x" * 48)
+WRONG_TOKEN = "wrong-ci-token-" + ("y" * 48)
+
 
 def setup_function():
     server._rate_events.clear()
@@ -35,7 +38,7 @@ def test_report_requires_authentication():
 
 
 def test_report_rejects_wrong_token(monkeypatch):
-    monkeypatch.setattr(server, "API_TOKEN", "expected-token")
+    monkeypatch.setattr(server, "API_TOKEN", TEST_TOKEN)
     response = server.app.test_client().post(
         "/api/report",
         json={"agent_id": "test"},
@@ -45,7 +48,7 @@ def test_report_rejects_wrong_token(monkeypatch):
 
 
 def test_report_accepts_valid_token(monkeypatch):
-    monkeypatch.setattr(server, "API_TOKEN", "ci-test-token")
+    monkeypatch.setattr(server, "API_TOKEN", TEST_TOKEN)
     response = server.app.test_client().post(
         "/api/report",
         json={"agent_id": "test", "branch": "test"},
