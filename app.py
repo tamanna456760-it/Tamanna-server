@@ -68,8 +68,8 @@ Base.metadata.create_all(engine)
 def require_token():
     """Require a configured bearer token and compare it in constant time."""
     token = API_TOKEN
-    if not token:
-        abort(503, description="Server authentication is not configured")
+    if len(token) < 32:
+        abort(503, description="Server authentication token is missing or too short")
     auth = request.headers.get("Authorization", "")
     scheme, separator, supplied = auth.partition(" ")
     if not separator or scheme.lower() != "bearer" or not supplied.strip():
