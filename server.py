@@ -1,4 +1,7 @@
-@app.route("/pull")
-def pull():
-    output = run_cmd("bash powerhub/auto_sync.sh")
-    return jsonify({"log": "🔄 PowerHub Pull Executed\n" + output})
+"""Compatibility entry point for the central Flask application.
+
+Legacy shell-based pull endpoints are intentionally not exposed here.
+"""
+from app import app
+
+__all__ = ["app"]
