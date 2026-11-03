@@ -12,6 +12,7 @@ services:
       APP_ENV: "${APP_ENV:-production}"
       HOST: "0.0.0.0"
       PORT: "8000"
+      TRUST_PROXY: "${TRUST_PROXY:-true}"
       ORCHESTRATOR_TOKEN: "${ORCHESTRATOR_TOKEN:?Set ORCHESTRATOR_TOKEN in .env}"
       DATABASE_URL: "${DATABASE_URL:-sqlite:////app/data/reports.db}"
       PYTHONUNBUFFERED: "1"
