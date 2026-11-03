@@ -48,6 +48,9 @@ jobs:
       - name: Validate domain configuration
         run: python scripts/validate_domains.py
 
+      - name: Scan tracked files for hard-coded secrets
+        run: python scripts/scan_secrets.py
+
       - name: Audit Python dependencies
         run: pip-audit -r requirements.txt
 
