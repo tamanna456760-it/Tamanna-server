@@ -1,0 +1,19 @@
+# DNS configuration plan for bd-king-r7.com
+# This is documentation, NOT an authoritative BIND zone file.
+# Do not load it into named or publish a placeholder address.
+# Replace ORIGIN_IPV4 only after confirming the real public VPS IPv4.
+
+$ORIGIN bd-king-r7.com.
+$TTL 3600
+
+; Apex website address — configure in Cloudflare dashboard:
+; @    IN A      ORIGIN_IPV4
+; www  IN CNAME  bd-king-r7.com.
+
+; Planned subdomains — publish only after their services are deployed:
+; api   IN CNAME  bd-king-r7.com.
+; admin IN CNAME  bd-king-r7.com.
+; app   IN CNAME  bd-king-r7.com.
+
+; Do not add MX/SPF/DKIM/DMARC until a mail provider is selected.
+; DNSSEC DS records must exactly match the current Cloudflare zone values.
