@@ -1,13 +1,13 @@
+import hmac
 import io
 import json
 import os
-import secrets
 from datetime import datetime
 
 import matplotlib
 import numpy as np
 import pandas as pd
-from flask import Flask, jsonify, render_template, request, session
+from flask import Flask, abort, jsonify, render_template, request, session
 from google_sync import GoogleSyncManager
 from master_doctor_ai import MasterDoctorAI, MedicalAnalyzer
 
@@ -15,8 +15,14 @@ matplotlib.use("Agg")
 
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = secrets.token_hex(32)
-app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100MB
+APP_SECRET_KEY = os.environ.get("APP_SECRET_KEY", "")
+if len(APP_SECRET_KEY) < 32:
+    raise RuntimeError("Set APP_SECRET_KEY to a persistent random value of at least 32 characters")
+app.config["SECRET_KEY"] = APP_SECRET_KEY
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("SESSION_COOKIE_SECURE", "true").lower() == "true"
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB upload limit
 app.config["UPLOAD_FOLDER"] = "uploads"
 app.config["GOOGLE_CREDENTIALS"] = "credentials/google_credentials.json"
 
@@ -51,6 +57,28 @@ class MasterDoctorSystem:
 master_doctor = MasterDoctorSystem()
 
 
+@app.before_request
+def protect_private_api():
+    """Protect all medical and Google integration APIs with a server-side token."""
+    if not request.path.startswith("/api/"):
+        return None
+    expected = os.environ.get("MEDICAL_API_TOKEN", "")
+    if not expected:
+        abort(503, description="Medical API is not configured")
+    authorization = request.headers.get("Authorization", "")
+    scheme, separator, supplied = authorization.partition(" ")
+    if not separator or scheme.lower() != "bearer":
+        abort(401)
+    if not hmac.compare_digest(supplied.strip(), expected):
+        abort(403)
+    return None
+
+
+@app.errorhandler(413)
+def upload_too_large(_error):
+    return jsonify({"error": "uploaded file exceeds the 10 MB limit"}), 413
+
+
 @app.route("/")
 def home():
     system_status = master_doctor.get_system_status()
@@ -79,8 +107,9 @@ def google_auth():
     try:
         auth_url = master_doctor.google_sync.get_authorization_url()
         return jsonify({"auth_url": auth_url})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Medical/Google integration operation failed")
+        return jsonify({"error": "operation failed"}), 500
 
 
 @app.route("/api/google/callback")
@@ -391,4 +420,4 @@ if __name__ == "__main__":
     print("🌐 Version: MD-2.0.1")
     print("📊 Status: Operational")
     print("🔄 Google Sync: Ready")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host=os.environ.get("HOST", "127.0.0.1"), port=int(os.environ.get("MEDICAL_APP_PORT", "5002")), debug=False)
