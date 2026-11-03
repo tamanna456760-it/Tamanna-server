@@ -5,19 +5,11 @@
     "primary": {
       "domain": "bd-king-r7.com",
       "www": "www.bd-king-r7.com",
+      "canonical_url": "https://www.bd-king-r7.com/",
       "purpose": "main_website",
       "registration_status": "unverified",
       "cloudflare_zone_status": "pending"
     },
-    "legacy_aliases": [
-      {
-        "host": "www.bd-king-r7.com",
-        "purpose": "redirect_to_primary",
-        "redirect_target": "https://www.bd-king-r7.com",
-        "tls_certificate_required": true,
-        "dns_must_point_to_same_origin": true
-      }
-    ],
     "onion": {
       "enabled": false,
       "type": "tor_v3_hidden_service",
@@ -31,14 +23,10 @@
   },
   "dns": {
     "provider": "cloudflare",
-    "nameservers": [
-      "pablo.ns.cloudflare.com",
-      "uma.ns.cloudflare.com"
-    ],
+    "nameservers": ["pablo.ns.cloudflare.com", "uma.ns.cloudflare.com"],
     "expected_records_file": "domains/cloudflare-dns-records.json",
     "origin_ipv4_required": true,
-    "do_not_publish_placeholder_ip": true,
-    "legacy_alias_dns_zone": "bd-king-r7.com"
+    "do_not_publish_placeholder_ip": true
   },
   "security": {
     "https_required": true,
