@@ -1,11 +1,13 @@
 # Tamanna AI report orchestrator.
+import hmac
 import json
 import logging
 import os
 from datetime import datetime
+from pathlib import Path
 
 from flask import Flask, abort, jsonify, render_template_string, request
-from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine
+from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -14,6 +16,16 @@ logger = logging.getLogger("tamanna.orchestrator")
 
 DB_URL = os.environ.get("DATABASE_URL", "sqlite:///reports.db")
 API_TOKEN = os.environ.get("ORCHESTRATOR_TOKEN", "")
+
+# Ensure the parent directory exists for file-backed SQLite databases.
+if DB_URL.startswith("sqlite:///") and not DB_URL.startswith("sqlite:///:memory:"):
+    sqlite_path = DB_URL.removeprefix("sqlite:///")
+    if sqlite_path and sqlite_path != ":memory:" and not sqlite_path.startswith("file:"):
+        db_file = Path(sqlite_path)
+        if db_file.is_absolute():
+            db_file.parent.mkdir(parents=True, exist_ok=True)
+        else:
+            db_file.parent.mkdir(parents=True, exist_ok=True)
 
 engine = create_engine(
     DB_URL,
@@ -48,12 +60,32 @@ def require_token():
     if not auth.startswith("Bearer "):
         abort(401)
     token = auth.split(" ", 1)[1].strip()
-    if token != API_TOKEN:
+    if not hmac.compare_digest(token, API_TOKEN):
         abort(403)
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "no-referrer")
+    response.headers.setdefault("Cache-Control", "no-store")
+    return response
+
+
+@app.errorhandler(413)
+def request_too_large(_error):
+    return jsonify({"error": "Request body is too large"}), 413
 
 
 @app.get("/health")
 def health():
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        logger.exception("Database health check failed")
+        return jsonify({"status": "unhealthy"}), 503
     return jsonify({"status": "ok", "service": "tamanna-orchestrator"}), 200
 
 
@@ -92,6 +124,9 @@ def index():
     session = Session()
     try:
         rows = session.query(Report).order_by(Report.id.desc()).limit(200).all()
+    except SQLAlchemyError:
+        logger.exception("Database error while loading the report dashboard")
+        return jsonify({"error": "Unable to load reports"}), 500
     finally:
         session.close()
 
