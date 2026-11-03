@@ -88,6 +88,7 @@ def api_report():
 
 @app.route("/")
 def index():
+    require_token()
     session = Session()
     try:
         rows = session.query(Report).order_by(Report.id.desc()).limit(200).all()
