@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-BD-King-R7 Terminal System
-Advanced Power Management & Control Terminal
+BD-King-R7 Terminal Demonstration
+SIMULATION ONLY — no hardware, network, security, backup, or deployment actions are performed
 """
 
 import os
@@ -30,14 +30,14 @@ class BDKingTerminal:
     def initialize_terminal(self):
         """Initialize terminal system"""
         print(f"\n🚀 INITIALIZING {self.terminal_name} {self.version}")
-        print("🔧 Loading Power Systems...")
+        print("🔧 Loading simulated status values only...")
         time.sleep(1)
 
         # Initialize power systems
         self.power_systems = {
             "core_power": {"status": "ONLINE", "level": 95, "stability": 99.8},
             "ai_processing": {"status": "ACTIVE", "load": 75, "efficiency": 92},
-            "security_grid": {"status": "ARMED", "level": "MAXIMUM", "threats": 0},
+            "security_grid": {"status": "NOT_MEASURED", "level": "UNKNOWN", "threats": "NOT_MEASURED"},
             "communication": {
                 "status": "SYNCED",
                 "bandwidth": "10GBps",
@@ -48,7 +48,7 @@ class BDKingTerminal:
 
         print("✅ Terminal Systems Ready")
         print("⚡ Power Grid: STABLE")
-        print("🔒 Security: ACTIVE")
+        print("🔒 Security: NOT MEASURED (demo only)")
         print("🤖 AI Core: OPERATIONAL\n")
 
     def display_prompt(self):
@@ -426,7 +426,7 @@ class BDKingTerminal:
             print(f"  {opt}")
             time.sleep(0.5)
 
-        print("🎯 SYSTEM OPTIMIZATION COMPLETE")
+        print("ℹ️ This is a demonstration; no system optimization was performed.")
 
     def cmd_deploy(self, args):
         """Deploy system modules"""
@@ -449,15 +449,13 @@ class BDKingTerminal:
             print(f"  {step} ✅")
             time.sleep(0.3)
 
-        print(f"✅ {module.upper()} DEPLOYED SUCCESSFULLY")
+        print(f"ℹ️ {module.upper()} deployment is not configured; no deployment was performed.")
 
     def cmd_update(self, args):
         """System update commands"""
         print("🔄 CHECKING FOR UPDATES...")
         time.sleep(1)
-        print("✅ SYSTEM IS UP TO DATE")
-        print("🔒 SECURITY PATCHES: CURRENT")
-        print("🤖 AI MODELS: LATEST VERSION")
+        print("ℹ️ Update source is not configured; no update was performed.")
 
     def cmd_backup(self, args):
         """Create system backup"""
@@ -475,7 +473,7 @@ class BDKingTerminal:
             print(f"  {step} ✅")
             time.sleep(0.4)
 
-        print("✅ BACKUP COMPLETED SUCCESSFULLY")
+        print("ℹ️ Backup storage and verification are not configured; no backup was created.")
 
     def cmd_restore(self, args):
         """Restore from backup"""
@@ -507,7 +505,7 @@ class BDKingTerminal:
 
         analysis_results = {
             "Performance": f"{np.random.randint(85, 99)}% optimal",
-            "Security": "No vulnerabilities detected",
+            "Security": "NOT MEASURED — no scanner is configured",
             "Efficiency": f"{np.random.randint(88, 98)}% efficient",
             "Stability": "System stable",
             "Recommendations": "Continue current operations",
@@ -748,7 +746,7 @@ class BDKingTerminal:
         return {"healthy": True, "message": "AI systems operating optimally"}
 
     def diagnose_security(self):
-        return {"healthy": True, "message": "Security systems fully operational"}
+        return {"healthy": False, "message": "Security status is unknown; no scanner is integrated"}
 
     def diagnose_network(self):
         return {"healthy": True, "message": "Network infrastructure stable"}
@@ -758,7 +756,7 @@ class BDKingTerminal:
 
     # Scan methods
     def run_security_scan(self):
-        return {"status": "OK", "message": "No threats detected"}
+        return {"status": "NOT_MEASURED", "message": "No security scanner is configured"}
 
     def run_performance_scan(self):
         return {"status": "OK", "message": "Performance optimal"}
