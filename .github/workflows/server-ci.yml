@@ -35,7 +35,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
       - name: Compile server code
-        run: python -m compileall -q app.py server.py agent.py apps.py synce.py monitoring.py auto_sync.py cloud_auto_sync.py tamanna_bd-king-r7_sunc.py tamanna_powerhub_pipeline.py tests scripts
+        run: python -m compileall -q app.py server.py agent.py apps.py synce.py monitoring.py auto_sync.py cloud_auto_sync.py tamanna_bd-king-r7_sunc.py tamanna_powerhub_pipeline.py security tests scripts
       - name: Lint server code
         run: ruff check --select E4,E7,E9,F app.py server.py agent.py apps.py synce.py tests scripts
       - name: Validate tracked JSON files
