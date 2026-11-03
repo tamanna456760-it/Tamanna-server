@@ -105,7 +105,7 @@ def enforce_rate_limit():
 
 @app.before_request
 def api_request_guard():
-    if request.path.startswith("/api/"):
+    if request.path.startswith(("/api/", "/mcp", "/bridge/")):
         enforce_rate_limit()
 
 
