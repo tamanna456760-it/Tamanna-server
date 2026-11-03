@@ -10,9 +10,12 @@ from pathlib import Path
 from flask import Flask, abort, jsonify, request
 from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import declarative_base, sessionmaker
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 DB_URL = os.environ.get("DATABASE_URL", "sqlite:///./data/reports.db")
+TRUST_PROXY = os.environ.get("TRUST_PROXY", "false").lower() == "true"
 API_TOKEN = os.environ.get("ORCHESTRATOR_TOKEN", "")
 MAX_CONTENT_LENGTH = int(os.environ.get("MAX_CONTENT_LENGTH", "1048576"))
 RATE_LIMIT_PER_MINUTE = max(1, int(os.environ.get("RATE_LIMIT_PER_MINUTE", "60")))
@@ -25,10 +28,10 @@ CORS_ORIGINS = {
 if MAX_CONTENT_LENGTH < 1:
     raise ValueError("MAX_CONTENT_LENGTH must be positive")
 
-if DB_URL.startswith("sqlite:///") and not DB_URL.startswith("sqlite:////"):
-    sqlite_path = DB_URL.removeprefix("sqlite:///")
-    if sqlite_path and sqlite_path != ":memory:":
-        Path(sqlite_path).parent.mkdir(parents=True, exist_ok=True)
+database_url = make_url(DB_URL)
+if database_url.get_backend_name() == "sqlite" and database_url.database not in (None, "", ":memory:"):
+    database_path = Path(database_url.database).expanduser()
+    database_path.parent.mkdir(parents=True, exist_ok=True)
 
 engine = create_engine(
     DB_URL,
@@ -39,6 +42,9 @@ Base = declarative_base()
 Session = sessionmaker(bind=engine)
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
+if TRUST_PROXY:
+    # Enable only when the app is reachable exclusively through trusted reverse proxies.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 _rate_lock = threading.Lock()
 _rate_events = {}
