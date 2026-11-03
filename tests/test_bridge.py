@@ -1,5 +1,6 @@
 import json
 import os
+import uuid
 
 from app import app
 from bridge import BridgeMessage
@@ -28,7 +29,7 @@ def test_message_round_trip_and_idempotency(monkeypatch):
     monkeypatch.setenv("MCP_BEARER_TOKEN", MCP_TOKEN)
     monkeypatch.setenv("TAMANNA_BRIDGE_SERVICE_TOKEN", SERVICE_TOKEN)
     client = app.test_client()
-    payload = {"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"send_user_message","arguments":{"text":"hello Tamanna","conversation_id":"ci-conversation","idempotency_key":"ci-key-00000001"}}}
+    payload = {"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"send_user_message","arguments":{"text":"hello Tamanna","conversation_id":"ci-conversation","idempotency_key": "ci-" + uuid.uuid4().hex}}}
     first = client.post("/mcp", json=payload, headers=headers(MCP_TOKEN)).get_json()
     second = client.post("/mcp", json=payload, headers=headers(MCP_TOKEN)).get_json()
     one = json.loads(first["result"]["content"][0]["text"])
