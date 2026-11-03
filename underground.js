@@ -1,9 +1,9 @@
-“use strict”;
+"use strict";
 
-const os = require(“node:os”);
+const os = require("node:os");
 
-const APP_NAME = “Tamanna AI”;
-const VERSION = “3.0.0”;
+const APP_NAME = "Tamanna AI";
+const VERSION = "3.0.0";
 
 module.exports = function tamannaPower() {
 const timestamp = new Date().toISOString();
@@ -12,9 +12,9 @@ const memory = process.memoryUsage();
 return {
 application: APP_NAME,
 module: {
-name: “Tamanna Power”,
+name: "Tamanna Power",
 version: VERSION,
-status: “OK”,
+status: "OK",
 active: true
 },
 
