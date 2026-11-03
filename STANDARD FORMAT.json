@@ -1,7 +1,7 @@
 {
 "$schema": "https://json-schema.org/draft/2020-12/schema",
 "formatVersion": "1.0.0",
-"attested": true,
+"attested": false,
 "tamanna": "tamanna456760-it",
 "version": "v1.0.0-MASTER",
 "timestamp": "2026-01-03T18:00:00Z",
