@@ -10,6 +10,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
+  <!-- Ignore generated build artifacts accidentally committed at repository root. -->
+  <ItemGroup>
+    <Compile Remove="*.AssemblyInfo.cs;*.GlobalUsings.g.cs;*.AssemblyAttributes.cs" />
+  </ItemGroup>
   <!-- Exclude agent sources which are a separate worker project to avoid duplicate compilation units -->
   <ItemGroup>
     <Compile Remove="agent\\**\\*.cs" />
