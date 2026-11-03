@@ -1,26 +1,19 @@
-# /etc/bdking/agent.yml (copy this to /etc/bdking/agent.yml and edit)
-repo_path: /home/youruser/projects/bd-king-r7
+# Copy to /etc/bdking/agent.yml and edit for a trusted local repository.
+# Store ORCHESTRATOR_TOKEN in the agent process environment, never in this YAML.
+repo_path: /home/youruser/projects/Tamanna-server
 branch: powerhub-auto
 remote: origin
-user: youruser
-interval_seconds: 60 # run every 60 seconds
-push_changes: false # set true only after testing
-fix_cmds:
-  - "git submodule update --init --recursive || true"
-  # Example for Node:
-  # - "npm ci --no-audit --no-fund || true"
-  # - "npx eslint --fix . || true"
-  # Example for Python:
-  # - "python -m pip install -r requirements-dev.txt || true"
-  # - "black . || true"
+interval_seconds: 300
+push_changes: false
+fix_cmds: []
 build_cmds:
-  # example:
-  # - "npm ci && npm run build && npm test"
-  # - "make all"
+  - "python -m compileall -q app.py server.py agent.py tests scripts"
+  - "python scripts/validate_json.py"
+  - "python scripts/validate_domains.py"
+  - "python -m pytest -q"
 ficar: ficar
 power_sync: power_sync
 lockfile: /var/lock/bd-king-r7-powerhub.lock
 logfile: /var/log/bd-king-r7-powerhub.log
-agent_id: bd-king-node-001
-server_url: https://orchestrator.example.com # set to your orchestrator URL or leave empty
-auth_token: "CHANGE_ME_TO_A_SECRET_TOKEN"
+agent_id: tamanna-agent-local
+server_url: ""
