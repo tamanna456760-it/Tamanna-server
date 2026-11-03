@@ -1,4 +1,6 @@
+import hmac
 import io
+import logging
 import os
 from datetime import datetime
 
@@ -6,14 +8,13 @@ import matplotlib
 import numpy as np
 import pandas as pd
 from bd_king_ai import AdvancedPredictor, BDKingAI
-from flask import Flask, jsonify, render_template, request, send_file
+from flask import Flask, abort, jsonify, render_template, request, send_file
 
 matplotlib.use("Agg")
 
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "bd-king-r7-ai-secret-key-2024"
-app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB upload limit
 app.config["UPLOAD_FOLDER"] = "uploads"
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
@@ -42,6 +43,29 @@ class BDKingR7System:
 
 # Initialize BD-KING-R7 AI System
 bd_king_system = BDKingR7System()
+
+
+@app.before_request
+def protect_analytics_api():
+    """Require a private bearer token for expensive analytics operations."""
+    protected_paths = {"/analyze", "/predict", "/visualize"}
+    if request.path not in protected_paths:
+        return None
+    expected = os.environ.get("ANALYTICS_API_TOKEN", "")
+    if not expected:
+        abort(503, description="Analytics API is not configured")
+    authorization = request.headers.get("Authorization", "")
+    scheme, separator, supplied = authorization.partition(" ")
+    if not separator or scheme.lower() != "bearer":
+        abort(401)
+    if not hmac.compare_digest(supplied.strip(), expected):
+        abort(403)
+    return None
+
+
+@app.errorhandler(413)
+def upload_too_large(_error):
+    return jsonify({"error": "uploaded file exceeds the 10 MB limit"}), 413
 
 
 @app.route("/")
@@ -106,8 +130,9 @@ def analyze_data():
 
         return jsonify({"error": "Invalid file", "system": "BD-KING-R7"}), 400
 
-    except Exception as e:
-        return jsonify({"error": str(e), "system": "BD-KING-R7"}), 500
+    except Exception:
+        app.logger.exception("Analytics operation failed")
+        return jsonify({"error": "analytics operation failed", "system": "BD-KING-R7"}), 500
 
 
 @app.route("/predict", methods=["POST"])
@@ -220,8 +245,9 @@ def create_visualizations():
 
         return jsonify({"error": "Invalid file"}), 400
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Analytics operation failed")
+        return jsonify({"error": "analytics operation failed"}), 500
 
 
 def allowed_file(filename):
@@ -237,4 +263,4 @@ if __name__ == "__main__":
     print("🔧 System: BD-KING-R7 Advanced AI Analytics")
     print("🌐 Version: R7.2.1")
     print("📊 Status: Operational")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host=os.environ.get("HOST", "127.0.0.1"), port=int(os.environ.get("ANALYTICS_PORT", "5001")), debug=False)
