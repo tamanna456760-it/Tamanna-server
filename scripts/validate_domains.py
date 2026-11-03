@@ -40,6 +40,21 @@ def main():
             "Do not publish a fabricated origin IP")
     require(records.get("records", [{}])[0].get("type") == "A", "Root DNS record must be an A record")
 
+    legacy_domain = "tamanna" + ".com"
+    active_files = [
+        ROOT / "README.md",
+        ROOT / ".env.example",
+        ROOT / "Metadata.json",
+        ROOT / "Config" / "Config.json",
+        ROOT / "deploy" / "README.md",
+        ROOT / "deploy" / "nginx" / "acme-bootstrap.conf",
+        ROOT / "deploy" / "nginx" / "tamanna-domains.conf",
+        ROOT / "tests" / "test_server_health.py",
+    ]
+    for path in active_files:
+        require(legacy_domain not in path.read_text(encoding="utf-8"),
+                f"Legacy primary domain remains in {path.relative_to(ROOT)}")
+
     security = data.get("security", {})
     require(security.get("https_required") is True, "HTTPS must be required")
     require(security.get("tls_minimum") in {"1.2", "1.3"}, "TLS minimum must be 1.2 or 1.3")
