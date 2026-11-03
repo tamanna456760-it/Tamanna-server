@@ -1,0 +1,8 @@
+# Optional Tor v3 hidden service for the independent Tamanna Central Server.
+# Tor generates the onion hostname and private key on first startup.
+DataDirectory /var/lib/tor
+HiddenServiceDir /var/lib/tor/hidden_service
+HiddenServiceVersion 3
+HiddenServicePort 80 orchestrator:8000
+SocksPort 0
+Log notice stdout
