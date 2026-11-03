@@ -1,32 +1,17 @@
-const express = require("express");
-const app = express();
-const cors = require("cors");
+"use strict";
 
-app.use(cors());
-app.use(express.json());
-app.use(express.static("public"));
+// Compatibility entry point. The canonical static website server is server.js.
+const { createServer } = require("./server");
 
-// Include Power Modules
-const normal = require("./powerhub/normal");
-const medium = require("./powerhub/medium");
-const deep = require("./powerhub/deep");
-const dark = require("./powerhub/dark");
-const underground = require("./powerhub/underground");
-const silent = require("./powerhub/silent_supersonic");
-const stone = require("./powerhub/stone_spirit");
+if (require.main === module) {
+  const port = Number.parseInt(process.env.POWERHUB_PORT || "8080", 10);
+  const host = process.env.POWERHUB_HOST || "127.0.0.1";
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error("POWERHUB_PORT must be between 1 and 65535");
+  }
+  createServer().listen(port, host, () => {
+    process.stdout.write(`Tamanna compatibility website server listening on http://${host}:${port}\n`);
+  });
+}
 
-// API ENDPOINTS
-app.get("/power/normal", (req, res) => res.json(normal()));
-app.get("/power/medium", (req, res) => res.json(medium()));
-app.get("/power/deep", (req, res) => res.json(deep()));
-app.get("/power/dark", (req, res) => res.json(dark()));
-app.get("/power/underground", (req, res) => res.json(underground()));
-app.get("/power/silent", (req, res) => res.json(silent()));
-app.get("/power/stone", (req, res) => res.json(stone()));
-
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/index.html");
-});
-
-const PORT = 8080;
-app.listen(PORT, () => console.log(`PowerHub Running on Port ${PORT}`));
+module.exports = { createServer };
