@@ -44,7 +44,7 @@ app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 if TRUST_PROXY:
     # Enable only when the app is reachable exclusively through trusted reverse proxies.
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
 _rate_lock = threading.Lock()
 _rate_events = {}
