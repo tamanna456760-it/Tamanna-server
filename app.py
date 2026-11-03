@@ -1,9 +1,11 @@
-"""Tamanna Central Server - Flask API and report dashboard."""
+"""Tamanna Central Server - authenticated report API."""
+import hmac
 import json
 import os
 from datetime import datetime, timezone
+from pathlib import Path
 
-from flask import Flask, abort, jsonify, render_template_string, request
+from flask import Flask, abort, jsonify, request
 from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import declarative_base, sessionmaker
@@ -11,9 +13,16 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 DB_URL = os.environ.get("DATABASE_URL", "sqlite:///./data/reports.db")
 API_TOKEN = os.environ.get("ORCHESTRATOR_TOKEN", "")
 
+# Ensure relative SQLite database paths have a parent directory before connecting.
+if DB_URL.startswith("sqlite:///") and not DB_URL.startswith("sqlite:////"):
+    sqlite_path = DB_URL.removeprefix("sqlite:///")
+    if sqlite_path and sqlite_path != ":memory:":
+        Path(sqlite_path).parent.mkdir(parents=True, exist_ok=True)
+
 engine = create_engine(
     DB_URL,
     connect_args={"check_same_thread": False} if DB_URL.startswith("sqlite") else {},
+    pool_pre_ping=True,
 )
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
@@ -37,14 +46,24 @@ Base.metadata.create_all(engine)
 
 
 def require_token():
+    """Require a configured bearer token and compare it in constant time."""
     if not API_TOKEN:
         abort(503, description="Server authentication is not configured")
     auth = request.headers.get("Authorization", "")
-    if not auth.startswith("Bearer "):
+    scheme, separator, supplied = auth.partition(" ")
+    if not separator or scheme.lower() != "bearer" or not supplied.strip():
         abort(401)
-    token = auth.split(" ", 1)[1].strip()
-    if not token or token != API_TOKEN:
+    if not hmac.compare_digest(supplied.strip(), API_TOKEN):
         abort(403)
+
+
+@app.after_request
+def security_headers(response):
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "no-referrer")
+    response.headers.setdefault("Cache-Control", "no-store")
+    return response
 
 
 @app.get("/health")
@@ -65,8 +84,8 @@ def api_report():
             agent_id=str(data.get("agent_id", ""))[:128],
             timestamp=datetime.now(timezone.utc),
             branch=str(data.get("branch", ""))[:128],
-            build_ok=str(data.get("build_ok", False)),
-            committed=str(data.get("committed", False)),
+            build_ok=str(data.get("build_ok", False))[:32],
+            committed=str(data.get("committed", False))[:32],
             commit_sha=str(data.get("commit_sha") or "")[:64],
             payload=json.dumps(data, ensure_ascii=False),
         )
@@ -81,23 +100,35 @@ def api_report():
         session.close()
 
 
-@app.get("/")
-def index():
+@app.get("/api/reports")
+def list_reports():
+    """Return report data only to callers with the server bearer token."""
+    require_token()
     session = Session()
     try:
         rows = session.query(Report).order_by(Report.id.desc()).limit(200).all()
+        return jsonify([
+            {
+                "id": row.id,
+                "agent_id": row.agent_id,
+                "timestamp": row.timestamp.isoformat() if row.timestamp else None,
+                "branch": row.branch,
+                "build_ok": row.build_ok,
+                "committed": row.committed,
+                "commit_sha": row.commit_sha,
+            }
+            for row in rows
+        ])
     finally:
         session.close()
-    template = """
-    <!doctype html><html lang="en"><head><meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tamanna Central Server</title></head><body>
-    <h1>Tamanna Central Server</h1><p>Recent authorized agent reports</p>
-    <table border="1" cellpadding="6"><tr><th>ID</th><th>Agent</th><th>Time</th>
-    <th>Branch</th><th>Build</th><th>Committed</th><th>Commit</th></tr>
-    {% for r in rows %}<tr><td>{{ r.id }}</td><td>{{ r.agent_id }}</td>
-    <td>{{ r.timestamp }}</td><td>{{ r.branch }}</td><td>{{ r.build_ok }}</td>
-    <td>{{ r.committed }}</td><td>{{ r.commit_sha }}</td></tr>{% endfor %}
-    </table></body></html>
-    """
-    return render_template_string(template, rows=rows)
+
+
+@app.get("/")
+def index():
+    """Public, non-sensitive service landing page; never disclose stored reports."""
+    return jsonify({
+        "service": "Tamanna Central Server",
+        "status": "running",
+        "health": "/health",
+        "api": "/api/report",
+    })
