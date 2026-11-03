@@ -31,6 +31,8 @@ jobs:
           pip install -r requirements.txt pytest
       - name: Compile Python
         run: python -m compileall -q app.py server.py tests
+      - name: Validate all JSON files
+        run: python scripts/validate_json.py
       - name: Run server tests
         env:
           ORCHESTRATOR_TOKEN: ci-test-token
