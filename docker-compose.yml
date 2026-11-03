@@ -19,7 +19,7 @@ services:
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
-      - ./data:/app/data
+      - tamanna-data:/app/data
     healthcheck:
       test:
         - CMD
@@ -45,3 +45,6 @@ services:
 networks:
   tamanna-internal:
     driver: bridge
+
+volumes:
+  tamanna-data:
