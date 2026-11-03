@@ -9,6 +9,7 @@ import subprocess
 import sys
 import time
 import uuid
+from urllib.parse import urlparse
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -57,7 +58,7 @@ def run(cmd, cwd=None, timeout=300):
 
 def safe_relative_path(value, label):
     path = Path(value)
-    if path.is_absolute() or not value or any(part in ("..", "") for part in path.parts):
+    if path.is_absolute() or path == Path(".") or not value or any(part in ("..", "") for part in path.parts):
         raise ValueError(f"{label} must be a safe relative path")
     return path
 
@@ -90,8 +91,18 @@ class Agent:
         self.lockfile = Path(cfg.get("lockfile", "/var/lock/bd-king-r7-powerhub.lock"))
         self.logfile = Path(cfg.get("logfile", "/var/log/bd-king-r7-powerhub.log"))
         self.server_url = cfg.get("server_url", "").rstrip("/")
+        if self.server_url:
+            parsed_url = urlparse(self.server_url)
+            if parsed_url.scheme != "https" and parsed_url.hostname not in {"localhost", "127.0.0.1", "::1"}:
+                raise ValueError("server_url must use HTTPS except for localhost testing")
+            if not parsed_url.hostname or parsed_url.username or parsed_url.password:
+                raise ValueError("server_url must be a valid URL without embedded credentials")
         self.agent_id = cfg.get("agent_id", str(uuid.uuid4()))
         self.auth_token = os.environ.get("ORCHESTRATOR_TOKEN", "")
+        for marker in (self.ficar, self.powersync):
+            target = (self.repo_path / marker).resolve()
+            if self.repo_path not in target.parents:
+                raise ValueError("marker path resolves outside the repository")
         if not (self.repo_path / ".git").exists():
             raise ValueError(f"repo_path is not a Git repository: {self.repo_path}")
         if self.server_url and not self.auth_token:
@@ -132,6 +143,7 @@ class Agent:
                 json=payload,
                 headers=headers,
                 timeout=15,
+                allow_redirects=False,
             )
             self._write_log(f"report submitted with HTTP {response.status_code}")
             return response.status_code, response.text
