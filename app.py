@@ -234,3 +234,53 @@ if __name__ == "__main__":
         port=int(os.environ.get("PORT", "8000")),
         debug=os.environ.get("APP_DEBUG", "false").lower() == "true",
     )
+
+
+# TAMANNA_PROTOCOL_V1
+from security.service_protocol import verify_request
+
+@app.post("/protocol/v1/report")
+def protocol_v1_report():
+    raw_body = request.get_data(cache=True)
+    if not verify_request(request.method, request.path, request.headers, raw_body):
+        abort(401, description="Invalid service protocol authentication")
+    if not request.is_json:
+        return jsonify({"error": "Content-Type must be application/json"}), 415
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "expected a JSON object"}), 400
+    agent_id = data.get("agent_id")
+    if not isinstance(agent_id, str) or not agent_id.strip() or len(agent_id) > 128:
+        return jsonify({"error": "agent_id must be a non-empty string up to 128 characters"}), 400
+    session = Session()
+    try:
+        rep = Report(
+            agent_id=agent_id.strip(),
+            timestamp=datetime.now(timezone.utc),
+            branch=str(data.get("branch", ""))[:128],
+            build_ok=str(data.get("build_ok", False))[:32],
+            committed=str(data.get("committed", False))[:32],
+            commit_sha=str(data.get("commit_sha", ""))[:64],
+            payload=json.dumps(data, ensure_ascii=False),
+        )
+        session.add(rep)
+        session.commit()
+        return jsonify({"status": "ok", "id": rep.id, "protocol": "tamanna-service/1"}), 201
+    except SQLAlchemyError:
+        session.rollback()
+        app.logger.exception("Protocol report persistence failed")
+        return jsonify({"error": "database operation failed"}), 500
+    finally:
+        session.close()
+
+
+@app.get("/protocol/v1")
+def protocol_v1_info():
+    return jsonify({
+        "protocol": "tamanna-service/1",
+        "authentication": "HMAC-SHA256",
+        "signed_fields": ["method", "path", "timestamp", "nonce", "sha256(body)"],
+        "max_clock_skew_seconds": 300,
+        "report_endpoint": "POST /protocol/v1/report",
+    }), 200
+# END TAMANNA_PROTOCOL_V1
