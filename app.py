@@ -61,7 +61,7 @@ Base.metadata.create_all(engine)
 
 def require_token():
     """Require a configured bearer token and compare it in constant time."""
-    token = os.environ.get("ORCHESTRATOR_TOKEN", API_TOKEN)
+    token = API_TOKEN
     if not token:
         abort(503, description="Server authentication is not configured")
     auth = request.headers.get("Authorization", "")
