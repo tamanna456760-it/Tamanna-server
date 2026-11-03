@@ -68,3 +68,38 @@ def test_protocol_info_is_public_and_does_not_disclose_secret():
 def test_protocol_report_requires_signature():
     response = app.test_client().post("/protocol/v1/report", json={"agent_id": "tamanna-ai"})
     assert response.status_code == 401
+
+
+def test_configured_redis_uses_atomic_nonce_claim(monkeypatch):
+    class FakeRedis:
+        def __init__(self):
+            self.claimed = set()
+
+        def set(self, key, value, nx=False, ex=None):
+            if nx and key in self.claimed:
+                return None
+            self.claimed.add(key)
+            return True
+
+    fake = FakeRedis()
+    class FakeRedisModule:
+        @staticmethod
+        def from_url(*args, **kwargs):
+            return fake
+
+    import sys
+    monkeypatch.setitem(sys.modules, "redis", FakeRedisModule)
+    monkeypatch.setattr(protocol, "REDIS_URL", "redis://fake/0")
+    assert protocol._claim_nonce("tamanna-ai", "nonce_redis_123456789", int(time.time()))
+    assert not protocol._claim_nonce("tamanna-ai", "nonce_redis_123456789", int(time.time()))
+
+
+def test_configured_redis_fails_closed_when_unavailable(monkeypatch):
+    import sys
+    class BrokenRedisModule:
+        @staticmethod
+        def from_url(*args, **kwargs):
+            raise ConnectionError("unavailable")
+    monkeypatch.setitem(sys.modules, "redis", BrokenRedisModule)
+    monkeypatch.setattr(protocol, "REDIS_URL", "redis://unavailable/0")
+    assert not protocol._claim_nonce("tamanna-ai", "nonce_redis_987654321", int(time.time()))
