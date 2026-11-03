@@ -38,7 +38,7 @@ app.Use(async (context, next) =>
 bool IsAuthorized(HttpRequest request, IConfiguration configuration)
 {
     var expected = configuration["Orchestrator:Token"];
-    if (string.IsNullOrWhiteSpace(expected))
+    if (string.IsNullOrWhiteSpace(expected) || expected.Length < 32)
         return false;
 
     var authorization = request.Headers["Authorization"].ToString();
@@ -76,7 +76,7 @@ app.MapGet("/health/ready", async Task<IResult> (AppDbContext db) =>
 
 app.MapPost("/api/report", async Task<IResult> (HttpRequest request, AppDbContext db, IConfiguration cfg, ILogger<Program> logger) =>
 {
-    if (string.IsNullOrWhiteSpace(cfg["Orchestrator:Token"]))
+    if (string.IsNullOrWhiteSpace(cfg["Orchestrator:Token"]) || cfg["Orchestrator:Token"]!.Length < 32)
         return Results.Json(new { error = "server authentication is not configured" }, statusCode: 503);
 
     if (!IsAuthorized(request, cfg))
