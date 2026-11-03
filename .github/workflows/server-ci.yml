@@ -108,7 +108,7 @@ jobs:
           node-version: "22"
 
       - name: Syntax-check website server
-        run: node --check server.js
+        run: node --check server.js && node --check server_main.js && node --check underground.js && node --check ai-github-bot.js
 
       - name: Test static website server
         run: npm test
