@@ -1,20 +1,17 @@
-name: Jekyll site CI
+# This repository is a Python/Flask server, not a Jekyll site.
+# Keep the legacy build available for manual diagnostics only; server-ci.yml
+# is the authoritative CI workflow for pushes and pull requests.
+name: Legacy Jekyll site CI (manual only)
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  build:
-
+  legacy-build:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the site in the jekyll/builder container
-      run: |
-        docker run \
-        -v ${{ github.workspace }}:/srv/jekyll -v ${{ github.workspace }}/_site:/srv/jekyll/_site \
-        jekyll/builder:latest /bin/bash -c "chmod -R 777 /srv/jekyll && jekyll build --future"
+      - name: Explain disabled legacy build
+        run: echo "Jekyll CI is disabled for this Python server repository. See Tamanna Server CI."
