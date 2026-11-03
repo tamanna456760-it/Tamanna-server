@@ -1,9 +1,12 @@
-"""Validate the checked-in Tamanna domain plan without claiming live DNS status."""
+"""Validate the planned domain configuration; this does not query live DNS."""
 import json
 from pathlib import Path
-from urllib.parse import urlparse
 
-CONFIG = Path(__file__).resolve().parents[1] / "domains" / "domain_config.json"
+ROOT = Path(__file__).resolve().parents[1]
+CONFIG = ROOT / "domains" / "domain_config.json"
+DNS_RECORDS = ROOT / "domains" / "cloudflare-dns-records.json"
+OLD_DOMAIN = "tamanna.com"
+NEW_DOMAIN = "bd-king-r7.com"
 
 
 def require(condition, message):
@@ -12,33 +15,40 @@ def require(condition, message):
 
 
 def main():
-    require(CONFIG.is_file(), "Domain configuration not found")
-    try:
-        data = json.loads(CONFIG.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        raise SystemExit(f"FAIL: Cannot read domain configuration: {exc}") from exc
-
-    domains = data.get("domains")
-    require(isinstance(domains, dict), "domains must be an object")
+    data = json.loads(CONFIG.read_text(encoding="utf-8"))
+    domains = data.get("domains", {})
     primary = domains.get("primary", {})
-    secondary = domains.get("secondary", {})
     onion = domains.get("onion", {})
+    require(primary.get("domain") == NEW_DOMAIN, "Primary domain must be bd-king-r7.com")
+    require(primary.get("www") == f"www.{NEW_DOMAIN}", "WWW host is incorrect")
+    require(primary.get("registration_status") == "unverified", "Do not claim registration without verification")
+    require(primary.get("cloudflare_zone_status") == "pending", "Cloudflare pending state must be explicit")
+    require(onion.get("enabled") is False, "Tor must remain disabled until a real v3 address is configured")
 
-    require(primary.get("domain") == "tamanna.com", "Primary domain must be tamanna.com")
-    require(primary.get("www") == "www.tamanna.com", "Primary www host must be www.tamanna.com")
-    require(secondary.get("domain") == "tamanna.io", "Secondary domain must be tamanna.io")
-    require(secondary.get("www") == "www.tamanna.io", "Secondary www host must be www.tamanna.io")
-    target = urlparse(secondary.get("redirect_target", ""))
-    require(target.scheme == "https" and target.netloc == "www.tamanna.com", "Secondary redirect must use the HTTPS primary website")
-    require(onion.get("enabled") is False, "Tor hidden service must remain disabled until an actual v3 address is configured")
+    subdomains = data.get("subdomains", {})
+    for name in ("api", "admin", "app"):
+        require(subdomains.get(name) == f"{name}.{NEW_DOMAIN}", f"{name} hostname is incorrect")
+
+    dns = data.get("dns", {})
+    require(dns.get("provider") == "cloudflare", "DNS provider must be Cloudflare")
+    require(dns.get("nameservers") == ["pablo.ns.cloudflare.com", "uma.ns.cloudflare.com"],
+            "Cloudflare nameservers do not match the supplied dashboard values")
+
+    records = json.loads(DNS_RECORDS.read_text(encoding="utf-8"))
+    require(records.get("zone") == NEW_DOMAIN, "DNS records zone mismatch")
+    require(records.get("records", [{}])[0].get("content") == "REPLACE_WITH_REAL_ORIGIN_IPV4",
+            "Do not publish a fabricated origin IP")
+    require(records.get("records", [{}])[0].get("type") == "A", "Root DNS record must be an A record")
 
     security = data.get("security", {})
     require(security.get("https_required") is True, "HTTPS must be required")
     require(security.get("tls_minimum") in {"1.2", "1.3"}, "TLS minimum must be 1.2 or 1.3")
     require(security.get("expose_private_keys") is False, "Private keys must never be exposed")
 
-    print("PASS: Domain configuration is structurally valid")
-    print("NOTE: This check does not verify domain ownership, live DNS, TLS, or hosting.")
+    print("PASS: bd-king-r7.com domain plan is structurally valid")
+    print("PASS: Cloudflare nameservers match the supplied dashboard")
+    print("PASS: DNS origin IP is an explicit placeholder, not a fabricated address")
+    print("NOTE: Domain registration, nameserver propagation, live DNS, TLS, and hosting are NOT verified")
 
 
 if __name__ == "__main__":
