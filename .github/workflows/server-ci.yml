@@ -104,3 +104,21 @@ jobs:
 
       - name: Test static website server
         run: npm test
+
+  dotnet-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore .NET project
+        run: dotnet restore bd-king-orchestrator.csproj
+
+      - name: Build .NET project
+        run: dotnet build bd-king-orchestrator.csproj --configuration Release --no-restore
