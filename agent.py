@@ -75,7 +75,10 @@ class Agent:
             raise ValueError("remote contains unsupported characters")
         self.user = cfg.get("user") or os.environ.get("USER", "nobody")
         self.interval = max(30, int(cfg.get("interval_seconds", 60)))
-        self.push_changes = bool(cfg.get("push_changes", False))
+        push_setting = cfg.get("push_changes", False)
+        if not isinstance(push_setting, bool):
+            raise ValueError("push_changes must be a YAML boolean")
+        self.push_changes = push_setting
         self.fix_cmds = cfg.get("fix_cmds", [])
         self.build_cmds = cfg.get("build_cmds", [])
         if not isinstance(self.fix_cmds, list) or not all(isinstance(x, str) for x in self.fix_cmds):
@@ -88,7 +91,7 @@ class Agent:
         self.logfile = Path(cfg.get("logfile", "/var/log/bd-king-r7-powerhub.log"))
         self.server_url = cfg.get("server_url", "").rstrip("/")
         self.agent_id = cfg.get("agent_id", str(uuid.uuid4()))
-        self.auth_token = cfg.get("auth_token", "") or os.environ.get("ORCHESTRATOR_TOKEN", "")
+        self.auth_token = os.environ.get("ORCHESTRATOR_TOKEN", "")
         if not (self.repo_path / ".git").exists():
             raise ValueError(f"repo_path is not a Git repository: {self.repo_path}")
         if self.server_url and not self.auth_token:
@@ -190,13 +193,16 @@ class Agent:
                         break
 
             uid = str(uuid.uuid4())
+            (self.repo_path / self.ficar).parent.mkdir(parents=True, exist_ok=True)
+            (self.repo_path / self.powersync).parent.mkdir(parents=True, exist_ok=True)
             (self.repo_path / self.ficar).write_text(
                 f"Updated at: {now_iso()}\nUUID: {uid}\n", encoding="utf-8"
             )
             (self.repo_path / self.powersync).write_text(
                 f"Last run: {now_iso()} BUILD_OK={build_ok}\n", encoding="utf-8"
             )
-            self.git(["add", "--", str(self.ficar), str(self.powersync)])
+            # Initial clean-tree check means all current changes were created by this run.
+            self.git("add -A")
 
             changes_rc, changes = self.git("status --porcelain")
             if changes_rc != 0:
