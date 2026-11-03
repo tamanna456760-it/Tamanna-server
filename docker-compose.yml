@@ -13,7 +13,8 @@ services:
       HOST: "0.0.0.0"
       PORT: "8000"
       TRUST_PROXY: "${TRUST_PROXY:-false}"
-      ORCHESTRATOR_TOKEN: "${ORCHESTRATOR_TOKEN:?Set ORCHESTRATOR_TOKEN in .env}"\n      TAMANNA_PROTOCOL_REDIS_URL: "redis://protocol-redis:6379/0"
+      ORCHESTRATOR_TOKEN: "${ORCHESTRATOR_TOKEN:?Set ORCHESTRATOR_TOKEN in .env}"
+      TAMANNA_PROTOCOL_REDIS_URL: "redis://protocol-redis:6379/0"
       DATABASE_URL: "${DATABASE_URL:-sqlite:////app/data/reports.db}"
       PYTHONUNBUFFERED: "1"
       PYTHONDONTWRITEBYTECODE: "1"
@@ -21,6 +22,9 @@ services:
       - "127.0.0.1:8000:8000"
     volumes:
       - tamanna-data:/app/data
+    depends_on:
+      protocol-redis:
+        condition: service_healthy
     healthcheck:
       test:
         - CMD
@@ -40,6 +44,19 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      - tamanna-internal
+
+  protocol-redis:
+    image: redis:7.4-alpine
+    container_name: tamanna-protocol-redis
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "64mb", "--maxmemory-policy", "noeviction"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
     networks:
       - tamanna-internal
 
