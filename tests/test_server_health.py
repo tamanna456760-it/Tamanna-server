@@ -36,6 +36,27 @@ def test_report_requires_authentication():
     )
     assert response.status_code in (401, 503)
 
+def test_report_rejects_weak_server_token(monkeypatch):
+    monkeypatch.setattr(server, "API_TOKEN", "weak-token")
+    response = server.app.test_client().post(
+        "/api/report",
+        json={"agent_id": "test"},
+        headers={"Authorization": "Bearer weak-token"},
+    )
+    assert response.status_code == 503
+
+
+def test_report_body_size_limit(monkeypatch):
+    monkeypatch.setitem(server.app.config, "MAX_CONTENT_LENGTH", 8)
+    monkeypatch.setattr(server, "API_TOKEN", TEST_TOKEN)
+    response = server.app.test_client().post(
+        "/api/report",
+        data='{"agent_id":"too-long"}',
+        content_type="application/json",
+        headers={"Authorization": f"Bearer {TEST_TOKEN}"},
+    )
+    assert response.status_code == 413
+
 
 def test_report_rejects_wrong_token(monkeypatch):
     monkeypatch.setattr(server, "API_TOKEN", TEST_TOKEN)
