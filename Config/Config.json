@@ -1,63 +1,31 @@
 {
-"server": {
-"name": "Tamanna AI",
-"host": "0.0.0.0",
-"port": 8080,
-"publicUrl": "https://www.tamanna.com",
-"protocol": "https",
-"environment": "production",
-"trustProxy": 1
-},
-"security": {
-"rateLimit": true,
-"maxRequestsPerMinute": 120,
-"enableCORS": true,
-"allowedOrigins": [
-"https://www.tamanna.com",
-"https://tamanna.com"
-],
-"helmet": true,
-"requireHttps": true,
-"hideServerDetails": true,
-"maxRequestBodyMB": 2
-},
-"database": {
-"enabled": false,
-"type": "none",
-"connection": ""
-},
-"logging": {
-"level": "info",
-"saveLogs": true,
-"logDirectory": "logs/",
-"timestamp": true,
-"rotateLogs": true,
-"redactSecrets": true
-},
-"health": {
-"enabled": true,
-"endpoint": "/health"
-},
-"api": {
-"enabled": true,
-"basePath": "/api",
-"requestTimeoutSeconds": 30
-},
-"backup": {
-"enabled": true,
-"beforeUpgrade": true,
-"retainCopies": 7
-},
-"updates": {
-"automaticDeployment": false,
-"requireTests": true,
-"requireBackup": true,
-"requireApprovalForDestructiveChanges": true
-},
-"meta": {
-"version": "2.0.0",
-"author": "HM INSAN ALI",
-"system": "Tamanna AI",
-"description": "Secure, modular Tamanna AI server configuration"
-}
+  "server": {
+    "name": "Tamanna AI",
+    "host": "0.0.0.0",
+    "port": 8000,
+    "publicUrl": "https://www.bd-king-r7.com",
+    "protocol": "https",
+    "environment": "production",
+    "trustProxy": 1
+  },
+  "security": {
+    "rateLimit": true,
+    "maxRequestsPerMinute": 120,
+    "enableCORS": true,
+    "allowedOrigins": [
+      "https://www.bd-king-r7.com",
+      "https://bd-king-r7.com"
+    ],
+    "helmet": true,
+    "requireHttps": true,
+    "hideServerDetails": true,
+    "maxRequestBodyMB": 2
+  },
+  "database": {"enabled": false, "type": "none", "connection": ""},
+  "logging": {"level": "info", "saveLogs": true, "logDirectory": "logs/", "timestamp": true, "rotateLogs": true, "redactSecrets": true},
+  "health": {"enabled": true, "endpoint": "/health"},
+  "api": {"enabled": true, "basePath": "/api", "requestTimeoutSeconds": 30},
+  "backup": {"enabled": true, "beforeUpgrade": true, "retainCopies": 7},
+  "updates": {"automaticDeployment": false, "requireTests": true, "requireBackup": true, "requireApprovalForDestructiveChanges": true},
+  "meta": {"version": "2.0.0", "author": "HM INSAN ALI", "system": "Tamanna AI"}
 }
