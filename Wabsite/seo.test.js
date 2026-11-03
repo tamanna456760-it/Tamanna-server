@@ -16,7 +16,7 @@ test("homepage has a descriptive title, summary, and indexable directives", () =
 });
 
 test("homepage uses one canonical host and social metadata", () => {
-  assert.match(html, new RegExp('<link rel="canonical" href="' + canonical.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + '"\\s*/>'));
+  assert.ok(html.includes(`<link rel="canonical" href="${canonical}" />`));
   assert.match(html, /property="og:url" content="https:\/\/www\.bd-king-r7\.com\//);
   assert.match(html, /property="og:title"/);
   assert.match(html, /name="twitter:card"/);
