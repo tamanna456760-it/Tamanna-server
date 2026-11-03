@@ -13,7 +13,7 @@ services:
       HOST: "0.0.0.0"
       PORT: "8000"
       TRUST_PROXY: "${TRUST_PROXY:-false}"
-      ORCHESTRATOR_TOKEN: "${ORCHESTRATOR_TOKEN:?Set ORCHESTRATOR_TOKEN in .env}"
+      ORCHESTRATOR_TOKEN: "${ORCHESTRATOR_TOKEN:?Set ORCHESTRATOR_TOKEN in .env}"\n      TAMANNA_PROTOCOL_REDIS_URL: "redis://protocol-redis:6379/0"
       DATABASE_URL: "${DATABASE_URL:-sqlite:////app/data/reports.db}"
       PYTHONUNBUFFERED: "1"
       PYTHONDONTWRITEBYTECODE: "1"
