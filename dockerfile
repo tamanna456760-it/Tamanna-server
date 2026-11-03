@@ -1,15 +1,16 @@
 FROM python:3.12-slim
 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
-# install runtime deps
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --no-compile -r requirements.txt
 
-# copy app
 COPY . .
 
-ENV ORCHESTRATOR_TOKEN=change-this-token
-
 EXPOSE 8000
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+
+# Credentials must be injected at runtime; never bake defaults into the image.
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--access-logfile", "-", "--error-logfile", "-", "app:app"]
