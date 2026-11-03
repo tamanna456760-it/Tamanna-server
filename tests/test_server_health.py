@@ -1,6 +1,10 @@
 import app as server
 
 
+def setup_function():
+    server._rate_events.clear()
+
+
 def test_health_endpoint_is_public_and_minimal():
     response = server.app.test_client().get("/health")
     assert response.status_code == 200
@@ -8,6 +12,12 @@ def test_health_endpoint_is_public_and_minimal():
         "status": "ok",
         "service": "tamanna-central-server",
     }
+
+
+def test_readiness_checks_database():
+    response = server.app.test_client().get("/health/ready")
+    assert response.status_code == 200
+    assert response.get_json() == {"status": "ready", "database": "ok"}
 
 
 def test_public_root_does_not_expose_reports():
@@ -42,7 +52,28 @@ def test_report_accepts_valid_token(monkeypatch):
         headers={"Authorization": "Bearer ci-test-token"},
     )
     assert response.status_code == 201
-    assert response.get_json() == {"status": "ok"}
+    assert response.get_json()["status"] == "ok"
+
+
+def test_report_rejects_non_json_content(monkeypatch):
+    monkeypatch.setattr(server, "API_TOKEN", "ci-test-token")
+    response = server.app.test_client().post(
+        "/api/report",
+        data="agent_id=test",
+        content_type="text/plain",
+        headers={"Authorization": "Bearer ci-test-token"},
+    )
+    assert response.status_code == 415
+
+
+def test_report_rejects_invalid_payload(monkeypatch):
+    monkeypatch.setattr(server, "API_TOKEN", "ci-test-token")
+    response = server.app.test_client().post(
+        "/api/report",
+        json={"agent_id": ""},
+        headers={"Authorization": "Bearer ci-test-token"},
+    )
+    assert response.status_code == 400
 
 
 def test_reports_endpoint_requires_authentication():
@@ -50,7 +81,34 @@ def test_reports_endpoint_requires_authentication():
     assert response.status_code in (401, 503)
 
 
+def test_reports_endpoint_accepts_valid_token(monkeypatch):
+    monkeypatch.setattr(server, "API_TOKEN", "ci-test-token")
+    response = server.app.test_client().get(
+        "/api/reports",
+        headers={"Authorization": "Bearer ci-test-token"},
+    )
+    assert response.status_code == 200
+    assert isinstance(response.get_json(), list)
+
+
 def test_security_headers_are_present():
     response = server.app.test_client().get("/health")
     assert response.headers["X-Content-Type-Options"] == "nosniff"
     assert response.headers["X-Frame-Options"] == "DENY"
+    assert response.headers["Cache-Control"] == "no-store"
+
+
+def test_cors_only_allows_configured_origins(monkeypatch):
+    monkeypatch.setattr(server, "CORS_ORIGINS", {"https://www.tamanna.com"})
+    client = server.app.test_client()
+    allowed = client.get("/health", headers={"Origin": "https://www.tamanna.com"})
+    blocked = client.get("/health", headers={"Origin": "https://evil.example"})
+    assert allowed.headers["Access-Control-Allow-Origin"] == "https://www.tamanna.com"
+    assert "Access-Control-Allow-Origin" not in blocked.headers
+
+
+def test_api_rate_limit(monkeypatch):
+    monkeypatch.setattr(server, "RATE_LIMIT_PER_MINUTE", 1)
+    client = server.app.test_client()
+    assert client.get("/api/reports").status_code in (401, 503)
+    assert client.get("/api/reports").status_code == 429
