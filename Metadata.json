@@ -25,11 +25,11 @@
 "domains": {
 "primary": "bd-king-r7.com",
 "www": "www.bd-king-r7.com",
-"legacyAliases": ["www.tamanna.com"],
+"legacyAliases": ["www.bd-king-r7.com"],
 "allowedHosts": [
 "bd-king-r7.com",
 "www.bd-king-r7.com",
-"www.tamanna.com"
+"www.bd-king-r7.com"
 ],
 "forceCanonicalHost": "www.bd-king-r7.com"
 },
