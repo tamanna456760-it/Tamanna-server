@@ -148,7 +148,7 @@ Planned domain endpoints:
 Domain	Intended Purpose
 www.bd-king-r7.com	Canonical production web access
 bd-king-r7.com	Redirect to canonical www host
-www.tamanna.com	Retained legacy HTTPS redirect to www.bd-king-r7.com
+www.bd-king-r7.com	Retained legacy HTTPS redirect to www.bd-king-r7.com
 tamanna.io	Additional domain (not migrated)
 Tamanna.onion	Planned Tor hidden service
 
