@@ -18,7 +18,7 @@ _NONCE_RE = re.compile(r"^[A-Za-z0-9_-]{16,128}$")
 
 def canonical_message(method: str, path: str, timestamp: str, nonce: str, body: bytes) -> bytes:
     digest = hashlib.sha256(body).hexdigest()
-    return "\\n".join((PROTOCOL_VERSION, method.upper(), path, timestamp, nonce, digest)).encode("utf-8")
+    return "\n".join((PROTOCOL_VERSION, method.upper(), path, timestamp, nonce, digest)).encode("utf-8")
 
 
 def sign_request(method: str, path: str, timestamp: str, nonce: str, body: bytes, secret: str) -> str:
