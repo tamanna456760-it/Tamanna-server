@@ -63,8 +63,8 @@ def protect_private_api():
     if not request.path.startswith("/api/"):
         return None
     expected = os.environ.get("MEDICAL_API_TOKEN", "")
-    if not expected:
-        abort(503, description="Medical API is not configured")
+    if len(expected) < 32:
+        abort(503, description="Medical API token is missing or too short")
     authorization = request.headers.get("Authorization", "")
     scheme, separator, supplied = authorization.partition(" ")
     if not separator or scheme.lower() != "bearer":
