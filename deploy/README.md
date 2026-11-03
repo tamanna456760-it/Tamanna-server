@@ -8,20 +8,20 @@ It does **not** create a VPS, control DNS, issue certificates, or deploy itself.
 - Ubuntu 22.04/24.04 VPS (or equivalent Linux host)
 - Docker Engine with the Docker Compose plugin
 - Nginx and Certbot
-- DNS for `bd-king-r7.com` and `www.bd-king-r7.com` pointing to this VPS; retain `www.tamanna.com` DNS pointing to the same origin for the legacy redirect
+- DNS for `bd-king-r7.com` and `www.bd-king-r7.com` pointing to this VPS; retain `www.bd-king-r7.com` DNS pointing to the same origin for the legacy redirect
 - Firewall allowing inbound TCP 80 and 443; do not expose 8000 publicly
 
 Verify DNS before proceeding:
 ```sh
 dig +short A bd-king-r7.com
 dig +short A www.bd-king-r7.com
-dig +short A www.tamanna.com
+dig +short A www.bd-king-r7.com
 ```
 If the VPS uses IPv6, configure matching AAAA records only when IPv6 is working end-to-end.
 
 ## 2. Domain and Cloudflare DNS
 
-The canonical website is `https://www.bd-king-r7.com`. Keep `www.tamanna.com` as a legacy alias that redirects to it. The `bd-king-r7.com` zone uses the Cloudflare nameservers assigned in the dashboard: `pablo.ns.cloudflare.com` and `uma.ns.cloudflare.com`. The separate `tamanna.com` DNS zone must also keep `www` pointed at this origin. A valid TLS certificate for `www.tamanna.com` is required before the HTTPS redirect can work. Do not publish a placeholder IP; use the real public IPv4 of the VPS.
+The canonical website is `https://www.bd-king-r7.com`. Keep `www.bd-king-r7.com` as a legacy alias that redirects to it. The `bd-king-r7.com` zone uses the Cloudflare nameservers assigned in the dashboard: `pablo.ns.cloudflare.com` and `uma.ns.cloudflare.com`. The separate `bd-king-r7.com` DNS zone must also keep `www` pointed at this origin. A valid TLS certificate for `www.bd-king-r7.com` is required before the HTTPS redirect can work. Do not publish a placeholder IP; use the real public IPv4 of the VPS.
 
 ## 3. Configure the application
 
@@ -78,7 +78,7 @@ sudo systemctl reload nginx
 After the new canonical hosts and retained legacy alias resolve to this server, issue certificates:
 ```sh
 sudo certbot certonly --webroot -w /var/www/html -d bd-king-r7.com -d www.bd-king-r7.com
-sudo certbot certonly --webroot -w /var/www/html --cert-name www.tamanna.com -d www.tamanna.com
+sudo certbot certonly --webroot -w /var/www/html --cert-name www.bd-king-r7.com -d www.bd-king-r7.com
 ```
 
 Then install the production TLS virtual hosts:
@@ -107,7 +107,7 @@ Verify from the server and an external network:
 curl -I https://www.bd-king-r7.com/
 curl --fail https://www.bd-king-r7.com/health
 curl --fail https://www.bd-king-r7.com/health/ready
-curl -I https://www.tamanna.com/  # expected: 301 to https://www.bd-king-r7.com/
+curl -I https://www.bd-king-r7.com/  # expected: 301 to https://www.bd-king-r7.com/
 ```
 
 The health endpoints are public and intentionally return minimal information. API routes require:
