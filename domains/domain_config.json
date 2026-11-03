@@ -1,29 +1,34 @@
-
 {
   "project": "Tamanna AI",
   "owner": "HM INSAN ALI",
   "domains": {
     "primary": {
-      "domain": "tamanna.com",
-      "www": "www.tamanna.com",
-      "purpose": "main_website"
-    },
-    "secondary": {
-      "domain": "tamanna.io",
-      "www": "www.tamanna.io",
-      "purpose": "redirect_to_primary",
-      "redirect_target": "https://www.tamanna.com"
+      "domain": "bd-king-r7.com",
+      "www": "www.bd-king-r7.com",
+      "purpose": "main_website",
+      "registration_status": "unverified",
+      "cloudflare_zone_status": "pending"
     },
     "onion": {
       "enabled": false,
-      "requested_name": "Tamanna.onion",
       "type": "tor_v3_hidden_service",
-      "note": "Tor generates the actual v3 onion address."
+      "note": "Enable only after generating and securely configuring an actual v3 onion address."
     }
   },
   "subdomains": {
-    "api": "api.tamanna.com",
-    "admin": "admin.tamanna.com"
+    "api": "api.bd-king-r7.com",
+    "admin": "admin.bd-king-r7.com",
+    "app": "app.bd-king-r7.com"
+  },
+  "dns": {
+    "provider": "cloudflare",
+    "nameservers": [
+      "pablo.ns.cloudflare.com",
+      "uma.ns.cloudflare.com"
+    ],
+    "expected_records_file": "domains/cloudflare-dns-records.json",
+    "origin_ipv4_required": true,
+    "do_not_publish_placeholder_ip": true
   },
   "security": {
     "https_required": true,
