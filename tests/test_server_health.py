@@ -42,7 +42,7 @@ def test_report_rejects_wrong_token(monkeypatch):
     response = server.app.test_client().post(
         "/api/report",
         json={"agent_id": "test"},
-        headers={"Authorization": "Bearer wrong-token"},
+        headers={"Authorization": f"Bearer {WRONG_TOKEN}"},
     )
     assert response.status_code == 403
 
@@ -52,7 +52,7 @@ def test_report_accepts_valid_token(monkeypatch):
     response = server.app.test_client().post(
         "/api/report",
         json={"agent_id": "test", "branch": "test"},
-        headers={"Authorization": "Bearer ci-test-token"},
+        headers={"Authorization": f"Bearer {TEST_TOKEN}"},
     )
     assert response.status_code == 201
     assert response.get_json()["status"] == "ok"
