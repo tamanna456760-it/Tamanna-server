@@ -2,40 +2,38 @@
 
 Primary domain: `bd-king-r7.com`
 Canonical website: `https://www.bd-king-r7.com`
-Legacy redirect alias to retain: `https://www.bd-king-r7.com`
+Apex redirect: `https://bd-king-r7.com/*` → `https://www.bd-king-r7.com/*`
 Owner attribution: HM INSAN ALI
 
 ## Current status
 
-- Cloudflare zone for `bd-king-r7.com`: Pending nameserver verification.
-- Assigned nameservers (from the Cloudflare dashboard): `pablo.ns.cloudflare.com` and `uma.ns.cloudflare.com`.
-- Domain registration: Not verified by this repository.
-- Origin server IPv4: Not supplied; do not invent one.
-- Live DNS records: Not created by this repository.
-- `www.bd-king-r7.com` must remain resolvable and have a valid TLS certificate so it can redirect to the new canonical host.
+- Cloudflare nameservers supplied: `pablo.ns.cloudflare.com` and `uma.ns.cloudflare.com`.
+- Domain registration: unverified.
+- Cloudflare zone activation: pending verification.
+- Origin server IPv4: not supplied; do not invent one.
+- Live DNS records: not created by this repository.
 
-## Intended DNS records
+## DNS records
 
-For `bd-king-r7.com`, see [cloudflare-dns-records.json](cloudflare-dns-records.json).
+See [cloudflare-dns-records.json](cloudflare-dns-records.json). Replace the A-record placeholder only after confirming the real public IPv4 of the production VPS. The `www` CNAME targets the apex domain. Do not publish placeholder values.
 
-The separate `bd-king-r7.com` DNS zone must also retain a `www` record pointing to the same web origin. Configure that record at the DNS provider authoritative for `bd-king-r7.com`; do not change its nameservers as part of this migration unless separately planned and verified.
+## Setup
 
-## Migration steps
+1. Verify domain registration and Cloudflare zone ownership.
+2. Set the assigned Cloudflare nameservers at the registrar, then wait for the zone to become Active.
+3. Obtain the actual public IPv4 of the production VPS.
+4. Create the apex A record and `www` CNAME in Cloudflare.
+5. Issue one certificate containing both `bd-king-r7.com` and `www.bd-king-r7.com`.
+6. Install and validate the Nginx configuration.
+7. Verify HTTP-to-HTTPS and apex-to-www redirects from an external network.
 
-1. Confirm that `bd-king-r7.com` is registered with an accredited registrar.
-2. At that domain's registrar, set exactly the Cloudflare nameservers shown above and wait for the zone to become Active.
-3. Obtain the real public IPv4 of the web origin.
-4. In the new Cloudflare zone, create an A record for `@` and a CNAME for `www`.
-5. In the existing `bd-king-r7.com` DNS zone, keep `www.bd-king-r7.com` pointed at the same origin.
-6. Issue valid certificates for both new canonical hosts and the old `www.bd-king-r7.com` alias.
-7. Configure Nginx to redirect the old alias to `https://www.bd-king-r7.com`.
+## DNSSEC
 
-Do not create an A record using `REPLACE_WITH_REAL_ORIGIN_IPV4`. It is a documentation placeholder, not an IP address.
+The DS record must match the current DS value shown by Cloudflare exactly. Do not copy an old DS record blindly; a mismatch can make the domain fail to resolve.
 
-## Security and email
+## Security
 
-- Keep origin services behind Cloudflare and restrict the origin firewall to Cloudflare IP ranges only after confirming a working Cloudflare route and an emergency admin path.
-- Use Full (strict) TLS after valid origin certificates are installed.
-- MX, SPF, DKIM, and DMARC are intentionally omitted until a real mail provider is selected.
-- API, admin, and app subdomains are planned only; do not publish them until their Nginx routing and access controls exist.
-- Never commit `.env`, API keys, TLS private keys, or Tor private keys.
+- Use Cloudflare Full (strict) after origin TLS is installed.
+- Do not expose API/admin/app subdomains until routing and access controls exist.
+- MX, SPF, DKIM and DMARC remain unconfigured until a mail provider is selected.
+- Never commit `.env`, API keys, TLS private keys or Tor private keys.
