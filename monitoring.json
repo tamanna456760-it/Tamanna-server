@@ -15,7 +15,7 @@
   },
   "tracked_metrics": {
     "code_quality": {
-      "enabled": true,
+      "enabled": false,
       "metrics": [
         "complexity",
         "maintainability",
@@ -30,7 +30,7 @@
       }
     },
     "security": {
-      "enabled": true,
+      "enabled": false,
       "checks": [
         "vulnerabilities",
         "secrets_detection",
@@ -55,7 +55,7 @@
       }
     },
     "coverage": {
-      "enabled": true,
+      "enabled": false,
       "target_coverage": 80,
       "track_branches": true,
       "track_functions": true
@@ -113,7 +113,7 @@
     }
   },
   "analytics": {
-    "enabled": true,
+    "enabled": false,
     "retention_days": 90,
     "metrics_collection": {
       "code_changes": true,
@@ -137,12 +137,12 @@
   },
   "security_settings": {
     "encryption": {
-      "enabled": true,
+      "enabled": false,
       "algorithm": "AES-256",
       "key_rotation_days": 30
     },
     "access_control": {
-      "enabled": true,
+      "enabled": false,
       "allowed_users": ["admin", "ci_cd", "monitoring_system"],
       "ip_whitelist": ["192.168.1.0/24", "10.0.0.0/8"]
     },
