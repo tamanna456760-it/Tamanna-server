@@ -19,7 +19,7 @@
 "production_url": "https://www.tamanna.com"
 },
 "attestation": {
-"declared": true,
+"declared": false,
 "verified": false,
 "issuer": null,
 "issued_at": "2026-01-03T18:00:00Z",
