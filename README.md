@@ -465,7 +465,7 @@ The .NET API requires the environment variable `Orchestrator__Token`; there is n
 
 ### Deployment boundaries
 
-- The Compose stack starts the Python API only. It does not provision Nginx, DNS, TLS, Tor, PostgreSQL, or the legacy applications.
+- The Compose stack starts the Python API and an optional Tor v3 hidden-service sidecar. It does not provision Nginx, DNS, TLS certificates, PostgreSQL, or the legacy applications.
 - The Node server is a local static-site preview; production Nginx serves the website files directly.
 - The .NET API is an alternative service, not automatically deployed by the Python Compose stack.
 - `Dns/db.tamanna.io` contains documentation-only TEST-NET addresses. Replace them with assigned public addresses before publishing DNS; do not use the sample zone as live DNS.
@@ -499,3 +499,26 @@ docker compose down
 ```
 
 The Docker volume `tamanna-data` persists across container recreation. `docker compose down -v` deletes it; do not run that unless you intentionally want to remove local server data.
+
+
+## Optional Tor v3 onion access
+
+The central server Compose stack includes a separate Tor sidecar. It publishes no host port and forwards onion HTTP traffic internally to the central API on port 8000.
+
+Start or rebuild the stack:
+
+```sh
+docker compose config
+docker compose up --build -d
+docker compose ps
+```
+
+After Tor has initialized, retrieve the generated onion hostname:
+
+```sh
+docker compose exec -T tor cat /var/lib/tor/hidden_service/hostname
+```
+
+Tor generates its own valid v3 `.onion` hostname and private key. The hostname is not a user-selected DNS name; a label such as `bd-king-r7.onion` cannot be assigned directly. The private key is persisted in the Docker volume `tamanna-tor-data`. Back it up securely and never commit or publish the key. Do not run `docker compose down -v` unless you intend to delete both persistent data volumes.
+
+This onion endpoint exposes the central API, not the separate Tamanna AI application. The API still enforces its own authentication; Tor does not bypass application authorization.
