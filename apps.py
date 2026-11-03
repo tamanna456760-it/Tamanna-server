@@ -1,6 +1,5 @@
 import hmac
 import io
-import logging
 import os
 from datetime import datetime
 
@@ -172,8 +171,9 @@ def predict():
 
         return jsonify(response)
 
-    except Exception as e:
-        return jsonify({"error": str(e), "system": "BD-KING-R7"}), 500
+    except Exception:
+        app.logger.exception("Prediction operation failed")
+        return jsonify({"error": "prediction operation failed", "system": "BD-KING-R7"}), 500
 
 
 @app.route("/system/status")
