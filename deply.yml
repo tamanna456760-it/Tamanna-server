@@ -1,33 +1,34 @@
-name: Deploy to Server
+# INACTIVE DEPLOYMENT TEMPLATE.
+# This file is at repository root, so GitHub Actions does not execute it.
+# Move it into .github/workflows only after configuring a staging environment,
+# reviewing remote paths, and approving a deployment procedure.
+name: Manual Tamanna Server Deployment Template
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: staging
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Sync files to server
-        uses: burnett01/rsync-deployments@v4
-        with:
-          switches: -avz --delete
-          path: .
-          remote_path: /opt/myauto
-          remote_host: ${{ secrets.SSH_HOST }}
-          remote_user: ${{ secrets.SSH_USER }}
-          remote_key: ${{ secrets.SSH_KEY }}
+      - name: Validate required deployment secrets
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          test -n "$SSH_HOST"
+          test -n "$SSH_USER"
+          test -n "$SSH_KEY"
 
-      - name: Restart service
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            sudo systemctl daemon-reload
-            sudo systemctl restart myauto.service
-            sudo systemctl status --no-pager myauto.service
+      - name: Explain required manual deployment review
+        run: |
+          echo "Deployment is intentionally not automated by this template."
+          echo "Review host, target directory, backup, health check and rollback before adding a deploy action."
