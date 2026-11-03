@@ -34,12 +34,15 @@ Generate a private token on the VPS and add it to `.env`:
 openssl rand -hex 32
 ```
 
-Set at least:
+Set at least (replace the values with your actual production configuration):
 - `APP_ENV=production`
 - `APP_DEBUG=false`
 - `ORCHESTRATOR_TOKEN=<unique-random-value>`
 - `DATABASE_URL=sqlite:////app/data/reports.db`
-- `CORS_ORIGINS=https://www.tamanna.com`
+- `CORS_ORIGINS=https://www.tamanna.com` (replace the example origins; do not allow `*`)
+- `TRUST_PROXY=true` only when the API is reachable exclusively through the local trusted Nginx reverse proxy
+- `MAX_CONTENT_LENGTH=1048576`
+- `RATE_LIMIT_PER_MINUTE=60`
 - `RATE_LIMIT_PER_MINUTE=60`
 
 Keep `.env`, API keys, database files, TLS certificates, and private keys out of GitHub. Never paste a real token into an issue, chat, workflow file, or commit.
