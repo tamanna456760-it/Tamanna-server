@@ -2,7 +2,7 @@
 
 Primary domain: `bd-king-r7.com`
 Canonical website: `https://www.bd-king-r7.com`
-Legacy redirect alias to retain: `https://www.tamanna.com`
+Legacy redirect alias to retain: `https://www.bd-king-r7.com`
 Owner attribution: HM INSAN ALI
 
 ## Current status
@@ -12,13 +12,13 @@ Owner attribution: HM INSAN ALI
 - Domain registration: Not verified by this repository.
 - Origin server IPv4: Not supplied; do not invent one.
 - Live DNS records: Not created by this repository.
-- `www.tamanna.com` must remain resolvable and have a valid TLS certificate so it can redirect to the new canonical host.
+- `www.bd-king-r7.com` must remain resolvable and have a valid TLS certificate so it can redirect to the new canonical host.
 
 ## Intended DNS records
 
 For `bd-king-r7.com`, see [cloudflare-dns-records.json](cloudflare-dns-records.json).
 
-The separate `tamanna.com` DNS zone must also retain a `www` record pointing to the same web origin. Configure that record at the DNS provider authoritative for `tamanna.com`; do not change its nameservers as part of this migration unless separately planned and verified.
+The separate `bd-king-r7.com` DNS zone must also retain a `www` record pointing to the same web origin. Configure that record at the DNS provider authoritative for `bd-king-r7.com`; do not change its nameservers as part of this migration unless separately planned and verified.
 
 ## Migration steps
 
@@ -26,8 +26,8 @@ The separate `tamanna.com` DNS zone must also retain a `www` record pointing to 
 2. At that domain's registrar, set exactly the Cloudflare nameservers shown above and wait for the zone to become Active.
 3. Obtain the real public IPv4 of the web origin.
 4. In the new Cloudflare zone, create an A record for `@` and a CNAME for `www`.
-5. In the existing `tamanna.com` DNS zone, keep `www.tamanna.com` pointed at the same origin.
-6. Issue valid certificates for both new canonical hosts and the old `www.tamanna.com` alias.
+5. In the existing `bd-king-r7.com` DNS zone, keep `www.bd-king-r7.com` pointed at the same origin.
+6. Issue valid certificates for both new canonical hosts and the old `www.bd-king-r7.com` alias.
 7. Configure Nginx to redirect the old alias to `https://www.bd-king-r7.com`.
 
 Do not create an A record using `REPLACE_WITH_REAL_ORIGIN_IPV4`. It is a documentation placeholder, not an IP address.
