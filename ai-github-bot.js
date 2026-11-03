@@ -1,41 +1,20 @@
-require("dotenv").config();
-const fs = require("fs");
-const simpleGit = require("simple-git");
-const { OpenAI } = require("openai");
+"use strict";
 
-const git = simpleGit();
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_KEY
-});
-
-async function aiEdit(prompt) {
-
-  console.log("📥 Pulling latest repo...");
-  await git.pull();
-
-  const code = fs.readFileSync("index.js", "utf8"); // change target file
-
-  console.log("🧠 Sending to AI...");
-
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: "You are a coding assistant. Modify the code safely." },
-      { role: "user", content: `Instruction: ${prompt}\n\nCode:\n${code}` }
-    ]
-  });
-
-  const newCode = response.choices[0].message.content;
-
-  fs.writeFileSync("index.js", newCode);
-
-  console.log("📤 Committing changes...");
-  await git.add(".");
-  await git.commit("AI Updated Code");
-  await git.push();
-
-  console.log("✅ Done!");
+// This legacy bot previously committed and pushed AI-generated code directly.
+// It is intentionally disabled until a reviewed branch/PR workflow and tests exist.
+function run() {
+  throw new Error(
+    "AI GitHub auto-edit/push is disabled. Use a reviewed branch and pull request workflow instead."
+  );
 }
 
-const userPrompt = process.argv[2];
-aiEdit(userPrompt);
+if (require.main === module) {
+  try {
+    run();
+  } catch (error) {
+    process.stderr.write(`DISABLED: ${error.message}\n`);
+    process.exitCode = 1;
+  }
+}
+
+module.exports = { run };
