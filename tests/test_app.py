@@ -16,10 +16,20 @@ class TamannaAppTests(unittest.TestCase):
         response = self.client.get("/health")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["status"], "ok")
+        self.assertEqual(response.headers["X-Content-Type-Options"], "nosniff")
+        self.assertEqual(response.headers["Cache-Control"], "no-store")
 
     def test_report_endpoint_rejects_missing_token(self):
         response = self.client.post("/api/report", json={"agent_id": "ci"})
         self.assertEqual(response.status_code, 401)
+
+    def test_report_endpoint_rejects_wrong_token(self):
+        response = self.client.post(
+            "/api/report",
+            json={"agent_id": "ci"},
+            headers={"Authorization": "Bearer wrong-token"},
+        )
+        self.assertEqual(response.status_code, 403)
 
     def test_dashboard_requires_authentication(self):
         response = self.client.get("/")
