@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from flask import Flask, abort, jsonify, request
+from bridge import register_bridge
+from security.service_protocol import verify_request
 from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.engine import make_url
@@ -43,7 +45,6 @@ Session = sessionmaker(bind=engine)
 app = Flask(__name__)
 
 # Authenticated ChatGPT MCP bridge and Tamanna service message queue.
-from bridge import register_bridge
 register_bridge(app, engine, Session)
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 if TRUST_PROXY:
@@ -241,7 +242,6 @@ if __name__ == "__main__":
 
 
 # TAMANNA_PROTOCOL_V1
-from security.service_protocol import verify_request
 
 @app.post("/protocol/v1/report")
 def protocol_v1_report():
