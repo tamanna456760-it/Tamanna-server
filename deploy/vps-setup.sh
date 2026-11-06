@@ -62,10 +62,21 @@ rm -f /etc/nginx/sites-enabled/default
 nginx -t
 systemctl reload nginx
 
-ufw allow OpenSSH
-ufw allow 80/tcp
-ufw allow 443/tcp
-ufw --force enable
+# Detect the active SSH daemon port before enabling UFW to avoid locking out
+# VPS providers that use a non-standard SSH port.
+if command -v sshd >/dev/null 2>&1; then
+  SSH_PORT="$(sshd -T 2>/dev/null | awk '$1 == "port" { print $2; exit }')"
+  if [[ "${SSH_PORT}" =~ ^[0-9]+$ ]] && (( SSH_PORT >= 1 && SSH_PORT <= 65535 )); then
+    ufw allow "${SSH_PORT}/tcp"
+    ufw allow 80/tcp
+    ufw allow 443/tcp
+    ufw --force enable
+  else
+    echo "Could not determine SSH port; leaving UFW unchanged to avoid lockout." >&2
+  fi
+else
+  echo "sshd not found; leaving UFW unchanged. Configure provider firewall and UFW manually." >&2
+fi
 
 echo
 echo "Bootstrap finished. Check: docker compose ps"
