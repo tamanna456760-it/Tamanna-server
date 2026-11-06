@@ -42,6 +42,6 @@ test("sitemap is validly namespaced and lists only canonical URLs", () => {
   assert.match(sitemap, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);
   assert.match(sitemap, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
   assert.match(sitemap, /<loc>https:\/\/www\.bd-king-r7\.com\/<\/loc>/);
-  assert.doesNotMatch(sitemap, /https?:\/\/(?!www\.bd-king-r7\.com)/);
+  assert.doesNotMatch(sitemap, /<loc>https?:\/\/(?!www\.bd-king-r7\.com)/);
   assert.match(sitemap, /<\/urlset>\s*$/);
 });
