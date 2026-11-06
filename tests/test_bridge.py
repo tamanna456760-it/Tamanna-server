@@ -1,9 +1,7 @@
 import json
-import os
 import uuid
 
 from app import app
-from bridge import BridgeMessage
 
 MCP_TOKEN = "mcp-test-token-" + ("m" * 48)
 SERVICE_TOKEN = "service-test-token-" + ("s" * 48)
