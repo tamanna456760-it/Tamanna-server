@@ -140,3 +140,35 @@ node --test Wabsite/seo.test.js
 Back up the persistent data volume before upgrades and test restoration periodically. A passing CI run does not prove that DNS, TLS, the VPS, or production storage is healthy.
 
 The current API is not a full user login/role-management platform. SQLite is intended for a small single-node deployment. Confirm the actual app runtime, service names, ports, and Nginx upstream before production rollout.
+
+
+## 8. Automated Ubuntu VPS bootstrap (new)
+
+The repository includes two scripts for the selected `bd-king-r7.com` + own-VPS deployment:
+
+1. From a fresh Ubuntu 22.04/24.04 VPS, connect over SSH and run:
+   ```sh
+   git clone https://github.com/tamanna456760-it/Tamanna-server.git
+   cd Tamanna-server
+   sudo bash deploy/vps-setup.sh
+   ```
+   The script installs the host packages, clones/updates the app under `/var/www/tamanna`, creates a private `.env` with a random orchestrator token if one does not exist, starts Compose, and installs the HTTP ACME bootstrap Nginx site. It does not buy a domain or guess an IP address.
+
+2. At the DNS provider, set the apex A record (`@`) and `www` A record to the VPS public IPv4. Wait until both resolve to that exact address.
+
+3. Activate HTTPS:
+   ```sh
+   sudo bash /var/www/tamanna/deploy/enable-tls.sh
+   ```
+   The script checks both DNS names against the VPS public IPv4 before requesting a certificate, then installs the production Nginx config and tests renewal.
+
+4. Verify:
+   ```sh
+   cd /var/www/tamanna
+   docker compose ps
+   curl --fail http://127.0.0.1:8000/health/ready
+   curl --fail https://www.bd-king-r7.com/health/ready
+   curl -I https://bd-king-r7.com/
+   ```
+
+Review your VPS provider's firewall/security-group rules as well as UFW. Permit inbound SSH on the actual SSH port, TCP 80 and TCP 443; do not permit public TCP 8000. Keep `.env` readable only by root and never paste its contents into chat or commit it. The bootstrap script must be reviewed against your provider's SSH port and firewall policy before running on a remote host.
