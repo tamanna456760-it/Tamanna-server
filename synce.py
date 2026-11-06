@@ -7,7 +7,7 @@ from datetime import datetime
 import matplotlib
 import numpy as np
 import pandas as pd
-from flask import Flask, abort, jsonify, render_template, request, session
+from flask import Flask, abort, jsonify, render_template, request, send_file, session
 from google_sync import GoogleSyncManager
 from master_doctor_ai import MasterDoctorAI, MedicalAnalyzer
 
