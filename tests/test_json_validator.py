@@ -36,4 +36,4 @@ def test_git_nul_separated_paths_are_parsed(monkeypatch, tmp_path):
         ),
     )
 
-    assert validate_json.tracked_json_files() == [first, second]
+    assert validate_json.tracked_json_files() == sorted([first, second])
