@@ -80,10 +80,10 @@ def test_report_rejects_non_json_content(monkeypatch):
 
 
 def test_report_rejects_invalid_payload(monkeypatch):
-    monkeypatch.setattr(server, "API_TOKEN", "ci-test-token")
+    monkeypatch.setattr(server, "API_TOKEN", TEST_TOKEN)
     response = server.app.test_client().post(
         "/api/report", json={"agent_id": ""},
-        headers={"Authorization": "Bearer ci-test-token"},
+        headers={"Authorization": f"Bearer {TEST_TOKEN}"},
     )
     assert response.status_code == 400
 
@@ -94,9 +94,9 @@ def test_reports_endpoint_requires_authentication():
 
 
 def test_reports_endpoint_accepts_valid_token(monkeypatch):
-    monkeypatch.setattr(server, "API_TOKEN", "ci-test-token")
+    monkeypatch.setattr(server, "API_TOKEN", TEST_TOKEN)
     response = server.app.test_client().get(
-        "/api/reports", headers={"Authorization": "Bearer ci-test-token"}
+        "/api/reports", headers={"Authorization": f"Bearer {TEST_TOKEN}"}
     )
     assert response.status_code == 200
     assert isinstance(response.get_json(), list)
