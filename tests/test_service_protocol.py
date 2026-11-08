@@ -82,10 +82,14 @@ def test_configured_redis_uses_atomic_nonce_claim(monkeypatch):
             return True
 
     fake = FakeRedis()
-    class FakeRedisModule:
+
+    class FakeRedisClient:
         @staticmethod
         def from_url(*args, **kwargs):
             return fake
+
+    class FakeRedisModule:
+        Redis = FakeRedisClient
 
     import sys
     monkeypatch.setitem(sys.modules, "redis", FakeRedisModule)
