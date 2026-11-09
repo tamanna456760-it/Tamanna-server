@@ -67,6 +67,36 @@ jobs:
         run: docker build --pull -f dockerfile -t tamanna-server-ci .
       - name: Build Tamanna AI container
         run: docker build --pull -f deploy/tamanna-ai/Dockerfile -t tamanna-ai-ci .
+      - name: Runtime smoke test Tamanna AI container
+        shell: bash
+        run: |
+          set -euo pipefail
+          cleanup() { docker rm -f tamanna-ai-smoke >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          docker run -d --name tamanna-ai-smoke \
+            -p 127.0.0.1:8001:8000 \
+            -e TAMANNA_ENV=test \
+            -e TAMANNA_MODEL_PROVIDER=mock \
+            -e TAMANNA_SESSION_SECRET=ci-only-test-secret-not-for-production-0123456789 \
+            -e TAMANNA_ADMIN_EMAIL=ci-admin@example.invalid \
+            -e TAMANNA_AUTH_DB=/app/data/ci-accounts.sqlite3 \
+            -e TAMANNA_DATABASE_URL=sqlite:////app/data/ci-tamanna.sqlite3 \
+            -e TAMANNA_CORS_ORIGINS=https://www.bd-king-r7.com \
+            -e TAMANNA_COOKIE_SECURE=0 \
+            tamanna-ai-ci
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8001/health >/tmp/tamanna-ai-health.json; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          python -c "import json; d=json.load(open('/tmp/tamanna-ai-health.json')); assert d.get('status') == 'ok', d"
+          curl --fail --silent http://127.0.0.1:8001/api/status | python -c "import json,sys; d=json.load(sys.stdin); assert d.get('status') == 'online', d"
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8001/api/admin/overview)" = "401"
+          echo "PASS: Tamanna AI startup, health, status, and unauthenticated admin gate"
       - name: Build Tor sidecar image
         run: docker build --pull -f deploy/tor/Dockerfile -t tamanna-server-tor-ci .
       - name: Smoke test production container
