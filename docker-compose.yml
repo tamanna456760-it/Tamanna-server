@@ -26,7 +26,62 @@ services:
     volumes:
       - tamanna-data:/app/data
     depends_on:
-      protocol-redis:
+      tamanna-ai:
+    profiles: ["ai"]
+    build:
+      context: .
+      dockerfile: deploy/tamanna-ai/Dockerfile
+    container_name: tamanna-ai
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "8000"
+      TAMANNA_ENV: "${TAMANNA_ENV:-production}"
+      TAMANNA_MODEL_PROVIDER: "${TAMANNA_MODEL_PROVIDER:-ollama}"
+      TAMANNA_OLLAMA_URL: "http://ollama:11434"
+      TAMANNA_OLLAMA_MODEL: "${TAMANNA_OLLAMA_MODEL:-qwen2.5:7b}"
+      TAMANNA_SESSION_SECRET: "${TAMANNA_SESSION_SECRET:-}"
+      TAMANNA_ADMIN_EMAIL: "${TAMANNA_ADMIN_EMAIL:-}"
+      TAMANNA_AUTH_DB: "/app/data/accounts.sqlite3"
+      TAMANNA_DATABASE_URL: "sqlite:////app/data/tamanna.sqlite3"
+      TAMANNA_MODEL_SETTINGS_PATH: "/app/data/model_settings.json"
+      TAMANNA_CORS_ORIGINS: "${TAMANNA_CORS_ORIGINS:-https://www.bd-king-r7.com}"
+      PYTHONUNBUFFERED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    ports:
+      - "127.0.0.1:8001:8000"
+    volumes:
+      - tamanna-ai-data:/app/data
+    depends_on:
+      ollama:
+        condition: service_started
+    networks:
+      - tamanna-internal
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  ollama:
+    profiles: ["ai"]
+    image: ollama/ollama:latest
+    container_name: tamanna-ollama
+    restart: unless-stopped
+    volumes:
+      - tamanna-ollama-models:/root/.ollama
+    networks:
+      - tamanna-internal
+    init: true
+    security_opt:
+      - no-new-privileges:true
+
+  protocol-redis:
         condition: service_healthy
     healthcheck:
       test:
@@ -103,4 +158,6 @@ networks:
 
 volumes:
   tamanna-data:
+  tamanna-ai-data:
+  tamanna-ollama-models:
   tamanna-tor-data:

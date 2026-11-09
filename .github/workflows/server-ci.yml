@@ -65,6 +65,8 @@ jobs:
           ORCHESTRATOR_TOKEN=tamanna-ci-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx docker compose config --quiet
       - name: Build production container
         run: docker build --pull -f dockerfile -t tamanna-server-ci .
+      - name: Build Tamanna AI container
+        run: docker build --pull -f deploy/tamanna-ai/Dockerfile -t tamanna-ai-ci .
       - name: Build Tor sidecar image
         run: docker build --pull -f deploy/tor/Dockerfile -t tamanna-server-tor-ci .
       - name: Smoke test production container
