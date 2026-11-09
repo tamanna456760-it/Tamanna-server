@@ -180,7 +180,16 @@ The manual workflow `.github/workflows/deploy-vps.yml` deploys the latest `main`
 
 ### One-time VPS setup
 
-Complete sections 1–4 above and run `deploy/vps-setup.sh` once. Confirm the app exists at `/var/www/tamanna`, Docker Compose works, and the VPS SSH login is available. Keep the SSH port that was configured on the VPS.
+Complete sections 1–4 above and run `deploy/vps-setup.sh` once. Confirm the app exists at `/var/www/tamanna`, Docker Compose works, and the VPS SSH login is available. Create a dedicated deployment user, give it ownership of the checkout, and grant Docker socket access (membership in the `docker` group is effectively root-equivalent):
+
+```sh
+sudo adduser --disabled-password --gecos "" tamanna-deploy
+sudo usermod -aG docker tamanna-deploy
+sudo chown -R tamanna-deploy:tamanna-deploy /var/www/tamanna
+sudo chmod 600 /var/www/tamanna/.env
+```
+
+Install that user's SSH public key in `~tamanna-deploy/.ssh/authorized_keys`, then reconnect as that user so the Docker group membership takes effect. Keep the SSH port that was configured on the VPS.
 
 ### Add repository Actions secrets
 
