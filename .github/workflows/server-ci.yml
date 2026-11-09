@@ -117,7 +117,14 @@ jobs:
             "${origin_args[@]}" -X POST http://127.0.0.1:8001/api/auth/login \
             --data '{"email":"ci-admin@example.invalid","password":"ci-test-password-strong-123"}' \
             | python -c "import json,sys; assert json.load(sys.stdin)['ok']"
-          echo "PASS: Tamanna AI startup, health, status, signup, session, admin authorization, logout, and login"
+          curl --fail --silent --show-error -c "$cookie_jar" -b "$cookie_jar" \
+            "${origin_args[@]}" -X POST http://127.0.0.1:8001/api/chat \
+            --data '{"message":"Reply with a short greeting."}' \
+            | python -c "import json,sys; d=json.load(sys.stdin); assert d['source']=='mock' and d['reply']=='Mock response: Reply with a short greeting.', d"
+          curl --fail --silent --show-error -b "$cookie_jar" \
+            http://127.0.0.1:8001/api/history \
+            | python -c "import json,sys; d=json.load(sys.stdin); assert d['history'] and d['history'][-1]['user']=='Reply with a short greeting.', d"
+          echo "PASS: Tamanna AI startup, health, status, signup, session, admin authorization, logout, login, mock chat generation, and SQLite chat history"
       - name: Build Tor sidecar image
         run: docker build --pull -f deploy/tor/Dockerfile -t tamanna-server-tor-ci .
       - name: Smoke test production container
