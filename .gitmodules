@@ -1,0 +1,3 @@
+[submodule "vendor/tamanna-ai"]
+	path = vendor/tamanna-ai
+	url = https://github.com/tamanna456760-it/Tamanna-.git
