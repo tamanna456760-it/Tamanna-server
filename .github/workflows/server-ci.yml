@@ -96,7 +96,28 @@ jobs:
           python -c "import json; d=json.load(open('/tmp/tamanna-ai-health.json')); assert d.get('status') == 'ok', d"
           curl --fail --silent http://127.0.0.1:8001/api/status | python -c "import json,sys; d=json.load(sys.stdin); assert d.get('status') == 'online', d"
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8001/api/admin/overview)" = "401"
-          echo "PASS: Tamanna AI startup, health, status, and unauthenticated admin gate"
+          cookie_jar="$(mktemp)"
+          trap 'docker rm -f tamanna-ai-smoke >/dev/null 2>&1 || true; rm -f "$cookie_jar"' EXIT
+          origin_args=(-H "Origin: https://www.bd-king-r7.com" -H "Content-Type: application/json")
+          curl --fail --silent --show-error -c "$cookie_jar" -b "$cookie_jar" \
+            "${origin_args[@]}" -X POST http://127.0.0.1:8001/api/auth/signup \
+            --data '{"email":"ci-admin@example.invalid","name":"CI Admin","password":"ci-test-password-strong-123"}' \
+            | python -c "import json,sys; d=json.load(sys.stdin); assert d['ok'] and d['user']['email']=='ci-admin@example.invalid', d"
+          curl --fail --silent --show-error -c "$cookie_jar" -b "$cookie_jar" \
+            http://127.0.0.1:8001/api/auth/me \
+            | python -c "import json,sys; d=json.load(sys.stdin); assert d['user']['email']=='ci-admin@example.invalid', d"
+          curl --fail --silent --show-error -c "$cookie_jar" -b "$cookie_jar" \
+            http://127.0.0.1:8001/api/admin/overview \
+            | python -c "import json,sys; d=json.load(sys.stdin); assert d['ok'] and d['admin']['email']=='ci-admin@example.invalid', d"
+          curl --fail --silent --show-error -c "$cookie_jar" -b "$cookie_jar" \
+            "${origin_args[@]}" -X POST http://127.0.0.1:8001/api/auth/logout \
+            --data '{}' | python -c "import json,sys; assert json.load(sys.stdin)['ok']"
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' -b "$cookie_jar" http://127.0.0.1:8001/api/auth/me)" = "401"
+          curl --fail --silent --show-error -c "$cookie_jar" -b "$cookie_jar" \
+            "${origin_args[@]}" -X POST http://127.0.0.1:8001/api/auth/login \
+            --data '{"email":"ci-admin@example.invalid","password":"ci-test-password-strong-123"}' \
+            | python -c "import json,sys; assert json.load(sys.stdin)['ok']"
+          echo "PASS: Tamanna AI startup, health, status, signup, session, admin authorization, logout, and login"
       - name: Build Tor sidecar image
         run: docker build --pull -f deploy/tor/Dockerfile -t tamanna-server-tor-ci .
       - name: Smoke test production container
