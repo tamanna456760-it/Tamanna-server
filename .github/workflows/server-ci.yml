@@ -58,7 +58,7 @@ jobs:
           ORCHESTRATOR_TOKEN: tamanna-ci-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
           DATABASE_URL: sqlite://
           CORS_ORIGINS: https://www.bd-king-r7.com
-        run: python -m pytest -q
+        run: python -m pytest -q tests
       - name: Validate Docker Compose configuration
         run: |
           cp .env.example .env
