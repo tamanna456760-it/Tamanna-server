@@ -1,0 +1,82 @@
+name: Deploy Tamanna API to VPS
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy main to production VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Validate deployment secrets and prepare SSH
+        shell: bash
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_PORT: ${{ secrets.VPS_SSH_PORT }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          set -Eeuo pipefail
+          : "${VPS_HOST:?Add VPS_HOST in repository Actions secrets}"
+          : "${VPS_USER:?Add VPS_USER in repository Actions secrets}"
+          : "${VPS_SSH_KEY:?Add VPS_SSH_KEY in repository Actions secrets}"
+          : "${VPS_KNOWN_HOSTS:?Add VPS_KNOWN_HOSTS in repository Actions secrets}"
+          VPS_SSH_PORT="${VPS_SSH_PORT:-22}"
+          if ! [[ "${VPS_SSH_PORT}" =~ ^[0-9]+$ ]] || (( VPS_SSH_PORT < 1 || VPS_SSH_PORT > 65535 )); then
+            echo "VPS_SSH_PORT must be a valid TCP port." >&2
+            exit 1
+          fi
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$VPS_SSH_KEY" > "$HOME/.ssh/tamanna_deploy"
+          chmod 600 "$HOME/.ssh/tamanna_deploy"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          {
+            echo "VPS_HOST=$VPS_HOST"
+            echo "VPS_USER=$VPS_USER"
+            echo "VPS_SSH_PORT=$VPS_SSH_PORT"
+          } >> "$GITHUB_ENV"
+
+      - name: Deploy latest main safely
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh \
+            -p "$VPS_SSH_PORT" \
+            -i "$HOME/.ssh/tamanna_deploy" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "$VPS_USER@$VPS_HOST" 'bash -se' <<'REMOTE'
+          set -Eeuo pipefail
+          APP_DIR="/var/www/tamanna"
+          if [[ ! -d "$APP_DIR/.git" ]]; then
+            echo "VPS app checkout missing. Run deploy/vps-setup.sh once first." >&2
+            exit 1
+          fi
+          cd "$APP_DIR"
+          git fetch --prune origin main
+          git merge --ff-only origin/main
+          docker compose config --quiet
+          docker compose up -d --build --remove-orphans
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error http://127.0.0.1:8000/health/ready >/dev/null; then
+              echo "Tamanna API is healthy."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Health check failed after deployment. Recent service logs:" >&2
+          docker compose logs --tail=80 orchestrator >&2 || true
+          exit 1
+          REMOTE
