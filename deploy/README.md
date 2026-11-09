@@ -172,3 +172,32 @@ The repository includes two scripts for the selected `bd-king-r7.com` + own-VPS 
    ```
 
 Review your VPS provider's firewall/security-group rules as well as UFW. Permit inbound SSH on the actual SSH port, TCP 80 and TCP 443; do not permit public TCP 8000. Keep `.env` readable only by root and never paste its contents into chat or commit it. The bootstrap script must be reviewed against your provider's SSH port and firewall policy before running on a remote host.
+
+
+## 9. GitHub Actions → VPS deployment
+
+The manual workflow `.github/workflows/deploy-vps.yml` deploys the latest `main` commit to an already bootstrapped Ubuntu VPS. It does not create or rent a VPS, configure DNS, or enable TLS.
+
+### One-time VPS setup
+
+Complete sections 1–4 above and run `deploy/vps-setup.sh` once. Confirm the app exists at `/var/www/tamanna`, Docker Compose works, and the VPS SSH login is available. Keep the SSH port that was configured on the VPS.
+
+### Add repository Actions secrets
+
+In GitHub, open **Settings → Secrets and variables → Actions → New repository secret** and add:
+
+| Secret | Value |
+|---|---|
+| `VPS_HOST` | VPS public IPv4 address or SSH hostname |
+| `VPS_USER` | SSH user allowed to run the deployment commands (normally a dedicated deploy user with controlled Docker access) |
+| `VPS_SSH_KEY` | Private key for that SSH user; never commit or paste it into the repository |
+| `VPS_KNOWN_HOSTS` | Verified SSH host-key line for this host |
+| `VPS_SSH_PORT` | Optional custom SSH TCP port; defaults to `22` |
+
+Obtain the server host key from the VPS/provider console or another trusted channel and verify its fingerprint before saving it as `VPS_KNOWN_HOSTS`. For a non-default port, the known-hosts entry normally uses `[host]:port`. Do not disable SSH host-key checking.
+
+### Run a deployment
+
+Open **Actions → Deploy Tamanna API to VPS → Run workflow**, select `main`, and start the workflow. The job fetches and fast-forward updates `main`, validates the Compose configuration, rebuilds/restarts the services, and checks `http://127.0.0.1:8000/health/ready`. It fails rather than silently overwriting a non-fast-forward checkout or deploying when the initial VPS bootstrap is missing.
+
+The workflow is manual-only: pushes to GitHub do not automatically change the production server. Review the Actions log after each run. Never add credentials to workflow YAML, source files, or committed `.env` files.
