@@ -132,6 +132,29 @@ def audit_repository(root: Path) -> dict[str, Any]:
     checks.extend(inspect_nginx(nginx))
 
     env_example = read(".env.example")
+    template_values = {}
+    for line in env_example.splitlines():
+        if "=" in line and not line.lstrip().startswith("#"):
+            key, value = line.split("=", 1)
+            template_values[key.strip()] = value.strip()
+    for check_id, key, expected in (
+        ("secrets.debug_disabled_by_default", "APP_DEBUG", "false"),
+        ("secrets.secure_cookie_by_default", "SESSION_COOKIE_SECURE", "true"),
+    ):
+        checks.append(finding(
+            check_id,
+            "pass" if template_values.get(key, "").lower() == expected else "fail",
+            "high",
+            f"{key} has the production-safe template default." if template_values.get(key, "").lower() == expected else f"Set {key}={expected} in the production template.",
+        ))
+    origins = template_values.get("CORS_ORIGINS", "")
+    origin_safe = bool(origins) and "*" not in origins and "localhost" not in origins.lower()
+    checks.append(finding(
+        "secrets.production_cors_origins",
+        "pass" if origin_safe else "fail",
+        "high",
+        "Production CORS template contains explicit non-local origins only." if origin_safe else "Use explicit production HTTPS origins; keep localhost origins in a private development .env only.",
+    ))
     secret_names = (
         "ORCHESTRATOR_TOKEN",
         "TAMANNA_SERVICE_SHARED_SECRET",
