@@ -1,0 +1,47 @@
+name: Tamanna Server Security Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-server-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  defensive-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install test and audit tools
+        run: python -m pip install -r requirements-dev.txt
+      - name: Compile Python sources
+        run: python -m compileall -q app.py bridge.py security scripts tests
+      - name: Run test suite
+        run: python -m pytest -q
+      - name: Run read-only security posture audit
+        run: python scripts/security_audit.py --json > security-audit-report.json
+      - name: Audit Python dependencies
+        run: python -m pip_audit -r requirements.txt
+      - name: Upload security report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-server-security-audit
+          path: security-audit-report.json
+          if-no-files-found: ignore
+          retention-days: 14
