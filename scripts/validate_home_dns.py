@@ -25,7 +25,10 @@ def main():
     assert "172.16.0.0/12" in options
     assert "0.0.0.0/0" not in options
     assert "any;" not in options
-    assert ".local" not in (options + local + zone)
+    # The include filename is named.conf.local; reject only an actual .local zone.
+    combined = options + local + zone
+    assert 'zone ".local"' not in combined
+    assert 'zone ".local.' not in combined
     assert "bd-king-r7.com" not in (options + local + zone)
 
     addresses = []
