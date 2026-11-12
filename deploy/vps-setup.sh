@@ -42,14 +42,24 @@ fi
 chmod 600 .env
 
 # Generate the session-signing secret once; never print or commit it.
-if ! grep -q '^TAMANNA_SESSION_SECRET=.{32,}
+if ! grep -Eq '^TAMANNA_SESSION_SECRET=.{32,}$' .env; then
+  SESSION_SECRET="$(openssl rand -hex 32)"
+  if grep -q '^TAMANNA_SESSION_SECRET=' .env; then
+    sed -i "s|^TAMANNA_SESSION_SECRET=.*|TAMANNA_SESSION_SECRET=\${SESSION_SECRET}|" .env
+  else
+    printf '\nTAMANNA_SESSION_SECRET=%s\n' "\${SESSION_SECRET}" >> .env
+  fi
+  unset SESSION_SECRET
+fi
+
+# Enforce safe production defaults without printing secrets.
 sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
 sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
 sed -i 's/^TRUST_PROXY=.*/TRUST_PROXY=true/' .env
 sed -i 's|^CORS_ORIGINS=.*|CORS_ORIGINS=https://www.bd-king-r7.com,https://bd-king-r7.com|' .env
 
-if ! grep -Eq '^ORCHESTRATOR_TOKEN=.{32,}; then
-  echo "ORCHESTRATOR_TOKEN is missing/too short. Set a random 32+ character token in ${APP_DIR}/.env" >&2
+if ! grep -Eq '^ORCHESTRATOR_TOKEN=.{32,}$' .env; then
+  echo "ORCHESTRATOR_TOKEN is missing/too short. Set a random 32+ character token in \${APP_DIR}/.env" >&2
   exit 1
 fi
 
