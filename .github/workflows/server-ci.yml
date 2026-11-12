@@ -6,6 +6,7 @@ on:
       - main
       - "security/**"
       - "domain/**"
+      - "infra/**"
   pull_request:
     branches:
       - main
