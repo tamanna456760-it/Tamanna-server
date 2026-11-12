@@ -31,8 +31,9 @@ def main():
     addresses = []
     for line in zone.splitlines():
         stripped = line.strip()
-        if stripped.startswith(("ns1 IN A", "tamanna IN A")):
-            addresses.append(ipaddress.ip_address(stripped.split()[-1]))
+        parts = stripped.split()
+        if len(parts) >= 4 and parts[0] in {"ns1", "tamanna"} and parts[1:3] == ["IN", "A"]:
+            addresses.append(ipaddress.ip_address(parts[3]))
     assert len(addresses) == 2, "Expected the two example private A records"
     assert all(address.is_private for address in addresses)
     assert all(address == addresses[0] for address in addresses)
