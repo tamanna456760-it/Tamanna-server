@@ -1,0 +1,24 @@
+// Private-only BIND options template for a trusted home LAN.
+// Replace the example private subnet with the actual LAN subnet before enabling.
+acl "tamanna_home_clients" {
+    127.0.0.1;
+    192.168.0.0/16;
+    10.0.0.0/8;
+    172.16.0.0/12;
+};
+
+options {
+    directory "/var/cache/bind";
+
+    // Listen on loopback and private LAN interfaces only.
+    listen-on port 53 { 127.0.0.1; 192.168.0.0/16; 10.0.0.0/8; 172.16.0.0/12; };
+    listen-on-v6 { ::1; };
+
+    recursion yes;
+    allow-query { tamanna_home_clients; };
+    allow-recursion { tamanna_home_clients; };
+    allow-query-cache { tamanna_home_clients; };
+
+    // Do not configure public-facing recursion or router port forwarding.
+    dnssec-validation auto;
+};

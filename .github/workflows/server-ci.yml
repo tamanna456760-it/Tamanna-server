@@ -6,6 +6,7 @@ on:
       - main
       - "security/**"
       - "domain/**"
+      - "infra/**"
   pull_request:
     branches:
       - main
@@ -49,6 +50,10 @@ jobs:
         run: python scripts/validate_json.py
       - name: Validate domain configuration
         run: python scripts/validate_domains.py
+      - name: Validate private home DNS templates
+        run: python scripts/validate_home_dns.py
+      - name: Syntax-check home server setup scripts
+        run: bash -n scripts/home_server_preflight.sh scripts/install_home_dns.sh
       - name: Scan tracked files for hard-coded secrets
         run: python scripts/scan_secrets.py
       - name: Audit Python dependencies

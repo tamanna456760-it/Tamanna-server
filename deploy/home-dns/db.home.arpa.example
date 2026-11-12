@@ -1,0 +1,13 @@
+$TTL 300
+@   IN SOA ns1.home.arpa. hostmaster.home.arpa. (
+        2026111201 ; serial: increment on every zone change
+        3600       ; refresh
+        900        ; retry
+        1209600    ; expire
+        300        ; negative cache
+)
+    IN NS  ns1.home.arpa.
+
+; EXAMPLE ONLY: replace 192.168.1.10 with the server's reserved LAN IPv4.
+ns1     IN A    192.168.1.10
+tamanna IN A    192.168.1.10

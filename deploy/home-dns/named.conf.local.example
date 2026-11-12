@@ -1,0 +1,7 @@
+// Additive private zone. Include from the host's BIND named.conf.local
+// only after reviewing the options and replacing the example zone address.
+zone "home.arpa" {
+    type primary;
+    file "/etc/bind/db.home.arpa";
+    allow-update { none; };
+};
