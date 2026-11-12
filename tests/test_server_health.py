@@ -123,3 +123,12 @@ def test_api_rate_limit(monkeypatch):
     client = server.app.test_client()
     assert client.get("/api/reports").status_code in (401, 503)
     assert client.get("/api/reports").status_code == 429
+
+    
+def test_protocol_endpoint_is_rate_limited_before_authentication(monkeypatch):
+    monkeypatch.setattr(server, "RATE_LIMIT_PER_MINUTE", 1)
+    client = server.app.test_client()
+    first = client.post("/protocol/v1/report", json={"agent_id": "test"})
+    second = client.post("/protocol/v1/report", json={"agent_id": "test"})
+    assert first.status_code == 401
+    assert second.status_code == 429
