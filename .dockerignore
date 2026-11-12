@@ -40,3 +40,7 @@ Thumbs.db
 
 *.bak
 *.tmp
+
+# Exclude nested Git metadata from the separately checked-out AI source.
+/vendor/tamanna-ai/.git
+/vendor/tamanna-ai/.git/**

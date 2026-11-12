@@ -62,3 +62,6 @@ Thumbs.db
 *.bak
 *.swp
 *.old
+
+# AI application is checked out from its own Git repository at deploy time.
+/vendor/tamanna-ai/
