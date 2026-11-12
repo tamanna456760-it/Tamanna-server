@@ -70,13 +70,14 @@ jobs:
           docker compose config --quiet
           docker compose --profile ai up -d --build --remove-orphans
           for attempt in $(seq 1 30); do
-            if curl --fail --silent --show-error http://127.0.0.1:8000/health/ready >/dev/null; then
-              echo "Tamanna API is healthy."
+            if curl --fail --silent --show-error http://127.0.0.1:8000/health/ready >/dev/null \
+              && curl --fail --silent --show-error http://127.0.0.1:8001/health >/dev/null; then
+              echo "Tamanna Central API and Tamanna AI API are healthy."
               exit 0
             fi
             sleep 5
           done
           echo "Health check failed after deployment. Recent service logs:" >&2
-          docker compose logs --tail=80 orchestrator >&2 || true
+          docker compose --profile ai logs --tail=80 orchestrator tamanna-ai >&2 || true
           exit 1
           REMOTE
