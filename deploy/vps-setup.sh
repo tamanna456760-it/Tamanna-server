@@ -82,6 +82,7 @@ echo
 echo "Bootstrap finished. Check: docker compose ps"
 echo "Local API health:"
 curl --fail --silent http://127.0.0.1:8000/health
+curl --fail --silent http://127.0.0.1:8001/health
 echo
 echo "NEXT: point DNS A records @ and www to this VPS IPv4, then run:"
 echo "  sudo bash ${APP_DIR}/deploy/enable-tls.sh"
