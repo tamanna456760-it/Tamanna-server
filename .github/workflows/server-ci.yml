@@ -135,7 +135,7 @@ jobs:
             status=$?
             if [ "$status" -ne 0 ]; then
               echo "::group::Container state"
-              docker ps -a --filter name= tamanna-server-ci || true
+              docker ps -a --filter name=tamanna-server-ci || true
               docker inspect tamanna-server-ci --format '{{json .State}}' || true
               echo "::endgroup::"
               echo "::group::Container logs"
