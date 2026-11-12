@@ -54,7 +54,7 @@ fi
 
 # API is bound to loopback by Compose; only Nginx is exposed publicly.
 docker compose config >/dev/null
-docker compose up -d --build
+docker compose --profile ai up -d --build
 install -d -m 755 /var/www/html
 install -m 644 deploy/nginx/acme-bootstrap.conf /etc/nginx/sites-available/tamanna
 ln -sfn /etc/nginx/sites-available/tamanna /etc/nginx/sites-enabled/tamanna
