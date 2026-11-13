@@ -71,7 +71,7 @@ services:
       TAMANNA_AUTH_DB: "/app/data/accounts.sqlite3"
       TAMANNA_DATABASE_URL: "sqlite:////app/data/tamanna.sqlite3"
       TAMANNA_MODEL_SETTINGS_PATH: "/app/data/model_settings.json"
-      TAMANNA_CORS_ORIGINS: "${TAMANNA_CORS_ORIGINS:-https://www.bd-king-r7.com}"
+      TAMANNA_CORS_ORIGINS: "${TAMANNA_CORS_ORIGINS:-https://www.bd-king-r7.com,https://bd-king-r7.com,https://tamanna456760-it.github.io}"
       PYTHONUNBUFFERED: "1"
       PYTHONDONTWRITEBYTECODE: "1"
     ports:
