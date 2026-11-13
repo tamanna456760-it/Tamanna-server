@@ -46,7 +46,7 @@ Set production values in the private `.env` file. At minimum:
 - `APP_DEBUG=false`
 - `ORCHESTRATOR_TOKEN=<unique-random-value>`
 - `DATABASE_URL=sqlite:////app/data/reports.db`
-- `CORS_ORIGINS=https://www.bd-king-r7.com,https://bd-king-r7.com`
+- `TAMANNA_CORS_ORIGINS=https://www.bd-king-r7.com,https://bd-king-r7.com,https://tamanna456760-it.github.io` (the GitHub Pages origin is allowed only for the public guest `/api/chat` endpoint; account/admin APIs remain protected)
 - `TRUST_PROXY=true` only when the API is reachable exclusively through the trusted local Nginx proxy
 - `MAX_CONTENT_LENGTH=1048576`
 - `RATE_LIMIT_PER_MINUTE=60`
