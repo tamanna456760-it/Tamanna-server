@@ -42,6 +42,8 @@ openssl rand -hex 32
 ```
 
 Set production values in the private `.env` file. At minimum:
+
+For the GitHub Pages guest chat frontend, set `TAMANNA_CORS_ORIGINS=https://www.bd-king-r7.com,https://bd-king-r7.com,https://tamanna456760-it.github.io`. The Pages origin is permitted only by the public guest chat route; protected account/admin routes continue to reject cross-site browser requests.
 - `APP_ENV=production`
 - `APP_DEBUG=false`
 - `ORCHESTRATOR_TOKEN=<unique-random-value>`
