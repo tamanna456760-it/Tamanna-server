@@ -12,6 +12,10 @@ class DeploymentCorsConfigurationTests(unittest.TestCase):
             compose,
         )
 
+    def test_environment_template_includes_apex_and_pages_origins(self):
+        env_example = (ROOT / ".env.example").read_text()
+        self.assertIn("TAMANNA_CORS_ORIGINS=https://www.bd-king-r7.com,https://bd-king-r7.com,https://tamanna456760-it.github.io", env_example)
+
     def test_vps_bootstrap_sets_the_variable_consumed_by_ai_backend(self):
         setup = (ROOT / "deploy/vps-setup.sh").read_text()
         self.assertIn("set_env TAMANNA_CORS_ORIGINS ", setup)
