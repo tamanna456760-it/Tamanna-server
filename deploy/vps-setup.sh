@@ -53,7 +53,7 @@ set_env() {
 set_env APP_ENV production
 set_env APP_DEBUG false
 set_env TRUST_PROXY true
-set_env CORS_ORIGINS "https://www.bd-king-r7.com,https://bd-king-r7.com"
+set_env TAMANNA_CORS_ORIGINS "https://www.bd-king-r7.com,https://bd-king-r7.com,https://tamanna456760-it.github.io"
 chmod 600 .env
 docker compose config --quiet
 docker compose --profile ai up -d --build
