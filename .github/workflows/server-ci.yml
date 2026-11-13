@@ -81,7 +81,7 @@ jobs:
             -e TAMANNA_ADMIN_EMAIL=ci-admin@example.invalid \
             -e TAMANNA_AUTH_DB=/app/data/ci-accounts.sqlite3 \
             -e TAMANNA_DATABASE_URL=sqlite:////app/data/ci-tamanna.sqlite3 \
-            -e TAMANNA_CORS_ORIGINS=https://www.bd-king-r7.com \
+            -e TAMANNA_CORS_ORIGINS=https://www.bd-king-r7.com,https://bd-king-r7.com,https://tamanna456760-it.github.io \
             -e TAMANNA_COOKIE_SECURE=0 \
             tamanna-ai-ci
           ready=0
@@ -124,6 +124,14 @@ jobs:
           curl --fail --silent --show-error -b "$cookie_jar" \
             http://127.0.0.1:8001/api/history \
             | python -c "import json,sys; d=json.load(sys.stdin); assert d['history'] and d['history'][-1]['user']=='Reply with a short greeting.', d"
+          guest_origin_args=(-H "Origin: https://tamanna456760-it.github.io" -H "Content-Type: application/json")
+          curl --fail --silent --show-error -D /tmp/tamanna-guest-headers \
+            "${guest_origin_args[@]}" -X POST http://127.0.0.1:8001/api/chat \
+            --data '{"message":"Reply with a short guest greeting."}' \
+            -o /tmp/tamanna-guest-chat.json
+          grep -qi '^access-control-allow-origin: https://tamanna456760-it.github.io' /tmp/tamanna-guest-headers
+          python -c "import json; d=json.load(open('/tmp/tamanna-guest-chat.json')); assert d['source']=='mock' and d['handled'] and 'Reply with a short guest greeting.' in d['reply'], d"
+          echo "PASS: anonymous GitHub Pages origin can use guest chat without login"
           echo "PASS: Tamanna AI startup, health, status, signup, session, admin authorization, logout, login, mock chat generation, and SQLite chat history"
       - name: Build Tor sidecar image
         run: docker build --pull -f deploy/tor/Dockerfile -t tamanna-server-tor-ci .
