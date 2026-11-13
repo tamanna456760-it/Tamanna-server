@@ -58,7 +58,7 @@ ssh "${SSH_OPTS[@]}" "$VPS_USER@$VPS_HOST" 'printf "SSH connection OK: "; hostna
 
 echo
 echo "Starting Tamanna server bootstrap/update on the Ubuntu VPS..."
-ssh -tt "${SSH_OPTS[@]}" "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+ssh -tt "${SSH_OPTS[@]}" "$VPS_USER@$VPS_HOST" 'REPO_URL="https://github.com/tamanna456760-it/Tamanna-server.git" REMOTE_SETUP="deploy/vps-setup.sh" bash -s' <<'REMOTE'
 set -Eeuo pipefail
 
 if [[ ! -r /etc/os-release ]]; then
