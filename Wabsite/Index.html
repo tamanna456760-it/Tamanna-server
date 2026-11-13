@@ -221,6 +221,10 @@
         }
 
         .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
             padding: 10px 22px;
             border-radius: 999px;
             border: none;
@@ -551,14 +555,14 @@
                     <div class="hero-meta-item">Zero‑Limit Optimization</div>
                 </div>
 
-                <div class="hero-actions">
-                    <button class="btn-primary" onclick="scrollToSection('protocol')">
-                        View Tamanna Protocol
-                    </button>
-                    <button class="btn-ghost" onclick="scrollToSection('architecture')">
-                        <span>BD‑King‑R7 Architecture</span>
-                        <span>↗</span>
-                    </button>
+                <div class="hero-actions" aria-label="Tamanna AI applications">
+                    <a class="btn-primary" href="https://tamanna456760-it.github.io/tamanna-website/">
+                        Open Tamanna AI Chat <span aria-hidden="true">↗</span>
+                    </a>
+                    <a class="btn-ghost" href="https://tamanna456760-it.github.io/tamanna-website/admin/">
+                        <span>Open Tamanna Admin</span>
+                        <span aria-hidden="true">↗</span>
+                    </a>
                 </div>
             </div>
 
