@@ -131,7 +131,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          trap 'docker rm -f tamanna-server-ci >/dev/null 2>&1 || true' EXIT
+          cleanup() {
+            status=$?
+            if [ "$status" -ne 0 ]; then
+              echo "::group::Container state"
+              docker ps -a --filter name=tamanna-server-ci || true
+              docker inspect tamanna-server-ci --format '{{json .State}}' || true
+              echo "::endgroup::"
+              echo "::group::Container logs"
+              docker logs --tail 200 tamanna-server-ci || true
+              echo "::endgroup::"
+            fi
+            docker rm -f tamanna-server-ci >/dev/null 2>&1 || true
+            return "$status"
+          }
+          trap cleanup EXIT
           docker run -d --name tamanna-server-ci \
             -p 127.0.0.1:18000:8000 \
             -e ORCHESTRATOR_TOKEN=tamanna-ci-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
@@ -143,10 +157,17 @@ jobs:
               ready=1
               break
             fi
+            if [ "$(docker inspect -f '{{.State.Running}}' tamanna-server-ci 2>/dev/null || true)" != "true" ]; then
+              echo "ERROR: container exited before health endpoint became ready"
+              break
+            fi
             sleep 1
           done
-          test "$ready" -eq 1
-          curl --fail http://127.0.0.1:18000/health/ready
+          if [ "$ready" -ne 1 ]; then
+            echo "ERROR: production container did not pass /health startup check"
+            exit 1
+          fi
+          curl --fail --show-error http://127.0.0.1:18000/health/ready
           curl --fail --silent --show-error -X POST http://127.0.0.1:18000/api/report \
             -H 'Authorization: Bearer tamanna-ci-token-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' \
             -H 'Content-Type: application/json' -d '{"agent_id":"ci-smoke","branch":"main"}'
