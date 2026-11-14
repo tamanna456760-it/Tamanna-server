@@ -536,3 +536,8 @@ python -m pip_audit -r requirements.txt
 ```
 
 The audit checks authentication/token handling, rate limiting, request limits, container port exposure and privilege settings, service-protocol replay protection, Nginx TLS/security headers, and secret-template hygiene. It does not probe live hosts, scan ports, exploit vulnerabilities, or change the server. A CSP warning for `unsafe-inline` requires a deliberate frontend migration before it can be removed safely. GitHub Actions runs the checks on `main` pushes and pull requests.
+
+
+## Repository structure and cleanup
+
+See [Repository Boundaries](docs/REPOSITORY_BOUNDARIES.md) for the intended central-server ownership, target directory layout, confirmed tree-level cleanup candidates and safe migration rules. This is a migration plan; it does not claim that the current repository has already been reorganized or runtime-tested.
