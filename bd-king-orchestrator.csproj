@@ -13,6 +13,8 @@
   <!-- Ignore generated build artifacts accidentally committed at repository root. -->
   <ItemGroup>
     <Compile Remove="*.AssemblyInfo.cs;*.GlobalUsings.g.cs;*.AssemblyAttributes.cs" />
+    <!-- Quarantine preserves historical/generated source files but must never enter the build. -->
+    <Compile Remove="trash/**/*.cs" />
   </ItemGroup>
   <!-- Exclude agent sources which are a separate worker project to avoid duplicate compilation units -->
   <ItemGroup>

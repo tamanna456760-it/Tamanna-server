@@ -1,6 +1,7 @@
 
 .git
 .github
+trash
 .env
 .env.*
 !.env.example
