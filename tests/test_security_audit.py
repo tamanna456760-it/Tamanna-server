@@ -23,3 +23,18 @@ def test_nginx_audit_warns_about_inline_csp():
     inline = next(item for item in checks if item["id"] == "nginx.csp_inline")
     assert inline["status"] == "warn"
     assert inline["severity"] == "medium"
+
+
+def test_production_nginx_csp_does_not_allow_inline_code():
+    nginx = (ROOT / "deploy/nginx/tamanna-domains.conf").read_text(encoding="utf-8")
+    checks = inspect_nginx(nginx)
+    assert not any(item["id"] == "nginx.csp_inline" for item in checks), checks
+
+
+def test_public_homepage_uses_external_styles_and_script():
+    html = (ROOT / "Wabsite/Index.html").read_text(encoding="utf-8")
+    assert '<link rel="stylesheet" href="assets/css/tamanna-site.css" />' in html
+    assert '<script src="assets/js/tamanna-site.js" defer></script>' in html
+    assert not __import__("re").search(r"<style\\b", html, __import__("re").I)
+    assert not __import__("re").search(r"\\sstyle\\s*=", html, __import__("re").I)
+    assert not __import__("re").search(r"<script>(?!\\s*src)[\\s\\S]*?</script>", html, __import__("re").I)
