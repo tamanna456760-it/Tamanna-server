@@ -23,3 +23,10 @@ def test_nginx_audit_warns_about_inline_csp():
     inline = next(item for item in checks if item["id"] == "nginx.csp_inline")
     assert inline["status"] == "warn"
     assert inline["severity"] == "medium"
+
+
+def test_nginx_audit_accepts_strict_csp_without_inline_allowances():
+    checks = inspect_nginx(
+        "add_header Content-Security-Policy \"default-src 'self'; script-src 'self'; style-src 'self'\" always;"
+    )
+    assert not any(item["id"] == "nginx.csp_inline" for item in checks)
