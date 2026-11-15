@@ -37,7 +37,7 @@ if database_url.get_backend_name() == "sqlite" and database_url.database not in 
 
 engine = create_engine(
     DB_URL,
-    connect_args={"check_same_thread": False} if DB_URL.startswith("sqlite") else {},
+    connect_args={"check_same_thread": False, "timeout": 30} if DB_URL.startswith("sqlite") else {},
     pool_pre_ping=True,
 )
 Base = declarative_base()
