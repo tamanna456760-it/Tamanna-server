@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 from scripts.security_audit import audit_repository, inspect_nginx
 
@@ -35,6 +36,6 @@ def test_public_homepage_uses_external_styles_and_script():
     html = (ROOT / "Wabsite/Index.html").read_text(encoding="utf-8")
     assert '<link rel="stylesheet" href="assets/css/tamanna-site.css" />' in html
     assert '<script src="assets/js/tamanna-site.js" defer></script>' in html
-    assert not __import__("re").search(r"<style\\b", html, __import__("re").I)
-    assert not __import__("re").search(r"\\sstyle\\s*=", html, __import__("re").I)
-    assert not __import__("re").search(r"<script>(?!\\s*src)[\\s\\S]*?</script>", html, __import__("re").I)
+    assert not re.search(r"<style\b", html, re.I)
+    assert not re.search(r"\sstyle\s*=", html, re.I)
+    assert not re.search(r"<script>(?!\s*src)[\s\S]*?</script>", html, re.I)
