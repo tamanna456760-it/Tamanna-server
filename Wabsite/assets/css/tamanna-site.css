@@ -60,7 +60,7 @@
             height: 48px;
             flex: 0 0 48px;
             border-radius: 14px;
-            background: #07152f url("assets/tamanna-logo.svg") center / contain no-repeat;
+            background: #07152f url("../tamanna-logo.svg") center / contain no-repeat;
             border: 1px solid rgba(32,231,255,.42);
             box-shadow: 0 0 0 3px rgba(146,117,255,.12), 0 0 26px rgba(56,189,248,.28);
         }
@@ -242,7 +242,7 @@
             width: 120px;
             height: 120px;
             border-radius: 999px;
-            background: #07152f url("assets/tamanna-logo.svg") center / contain no-repeat;
+            background: #07152f url("../tamanna-logo.svg") center / contain no-repeat;
             box-shadow: 0 0 40px rgba(56,189,248,.55), 0 0 100px rgba(146,117,255,.28);
             border: 1px solid rgba(32,231,255,.45);
         }
