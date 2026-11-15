@@ -8,7 +8,7 @@ WEB = ROOT / "Wabsite"
 
 def test_website_uses_external_assets_without_inline_execution():
     html = (WEB / "Index.html").read_text(encoding="utf-8")
-    assert not re.search(r"<style\\b|\\sstyle\\s*=", html, re.IGNORECASE)
+    assert not re.search(r"<style\b|\sstyle\s*=", html, re.IGNORECASE)
     script_tags = re.findall(r"<script([^>]*)>", html, re.IGNORECASE)
     executable_inline = [
         attrs for attrs in script_tags
