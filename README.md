@@ -535,7 +535,7 @@ python -m pytest -q
 python -m pip_audit -r requirements.txt
 ```
 
-The audit checks authentication/token handling, rate limiting, request limits, container port exposure and privilege settings, service-protocol replay protection, Nginx TLS/security headers, and secret-template hygiene. It does not probe live hosts, scan ports, exploit vulnerabilities, or change the server. A CSP warning for `unsafe-inline` requires a deliberate frontend migration before it can be removed safely. GitHub Actions runs the checks on `main` pushes and pull requests.
+The audit checks authentication/token handling, rate limiting, request limits, container port exposure and privilege settings, service-protocol replay protection, Nginx TLS/security headers, and secret-template hygiene. It does not probe live hosts, scan ports, exploit vulnerabilities, or change the server. The website's inline CSS and executable JavaScript are externalized, allowing both Nginx and the Node static server to use a strict CSP without `unsafe-inline`. GitHub Actions runs the checks on `main` pushes and pull requests.
 
 
 ## Repository structure and cleanup
