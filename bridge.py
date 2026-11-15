@@ -21,8 +21,43 @@ class BridgeMessage(Base):
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=False)
 
+def _ensure_bridge_schema(engine):
+    """Create the SQLite bridge schema atomically across concurrent workers."""
+    if engine.dialect.name != "sqlite":
+        Base.metadata.create_all(engine)
+        return
+
+    # SQLAlchemy create_all(checkfirst=True) performs a separate existence
+    # check before CREATE TABLE. Two worker processes can both pass that check
+    # and race into "table bridge_messages already exists". SQLite's
+    # CREATE ... IF NOT EXISTS makes each DDL operation safe to repeat.
+    with engine.begin() as connection:
+        connection.exec_driver_sql(
+            """
+            CREATE TABLE IF NOT EXISTS bridge_messages (
+                id VARCHAR(64) NOT NULL PRIMARY KEY,
+                conversation_id VARCHAR(128) NOT NULL,
+                idempotency_key VARCHAR(128) NOT NULL UNIQUE,
+                status VARCHAR(24) NOT NULL,
+                message_text TEXT NOT NULL,
+                reply_text TEXT,
+                created_at DATETIME NOT NULL,
+                updated_at DATETIME NOT NULL
+            )
+            """
+        )
+        connection.exec_driver_sql(
+            "CREATE INDEX IF NOT EXISTS ix_bridge_messages_conversation_id "
+            "ON bridge_messages (conversation_id)"
+        )
+        connection.exec_driver_sql(
+            "CREATE INDEX IF NOT EXISTS ix_bridge_messages_status "
+            "ON bridge_messages (status)"
+        )
+
+
 def register_bridge(app, engine, Session):
-    Base.metadata.create_all(engine)
+    _ensure_bridge_schema(engine)
     bp = Blueprint("tamanna_bridge", __name__)
     max_chars = max(256, int(os.getenv("BRIDGE_MAX_MESSAGE_CHARS", "12000")))
    
