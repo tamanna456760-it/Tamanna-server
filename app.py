@@ -7,7 +7,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from flask import Flask, abort, jsonify, request
+from flask import Flask, abort, jsonify, request, send_from_directory
 from bridge import register_bridge
 from security.service_protocol import verify_request
 from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine, text
@@ -219,6 +219,18 @@ def list_reports():
         ])
     finally:
         session.close()
+
+
+@app.get("/admin/")
+def server_admin_panel():
+    """Serve the separate read-only server administration UI."""
+    return send_from_directory(Path(__file__).resolve().parent / "admin", "index.html")
+
+
+@app.get("/admin/assets/<path:filename>")
+def server_admin_assets(filename):
+    """Serve static assets for the read-only server administration UI."""
+    return send_from_directory(Path(__file__).resolve().parent / "admin" / "assets", filename)
 
 
 @app.get("/")
